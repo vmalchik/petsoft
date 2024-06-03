@@ -19,18 +19,24 @@ type PetItemProps = {
 };
 
 const PetItem = ({ pet }: PetItemProps) => {
+  const { handleChangeSelectedPetId } = usePetContext();
   return (
-    <li className="h-[70px] flex items-center cursor-pointer px-5 text-base gap-3 hover:bg-[#EFF1F2] focus:bg-[#EFF1F2] transition">
-      <Image
-        src={pet.imageUrl}
-        alt="pet photo"
-        // NextJS uses properties more as a ratio between width and height
-        width={45}
-        height={45}
-        //   cover to scale the image to fit the dimensions but maintain aspect ratio (may crop the image)
-        className="w-[45px] h-[45px] rounded-full object-cover"
-      />
-      <p className="font-semibold">{pet.name}</p>
+    <li>
+      <button
+        className="h-[70px] w-full flex items-center cursor-pointer px-5 text-base gap-3 hover:bg-[#EFF1F2] focus:bg-[#EFF1F2] transition"
+        onClick={() => handleChangeSelectedPetId(pet.id)}
+      >
+        <Image
+          src={pet.imageUrl}
+          alt="pet photo"
+          // NextJS uses properties more as a ratio between width and height
+          width={45}
+          height={45}
+          //   cover to scale the image to fit the dimensions but maintain aspect ratio (may crop the image)
+          className="w-[45px] h-[45px] rounded-full object-cover"
+        />
+        <p className="font-semibold">{pet.name}</p>
+      </button>
     </li>
   );
 };
