@@ -23,7 +23,7 @@ export default async function DashboardPage() {
         <div className="relative md:row-start-2 md:row-span-full md:col-start-1 md:col-span-1">
           <ContentBlock>
             <PetList />
-            <PetButton action="add" className="absolute bottom-4 right-4" />
+            <PetButton actionType="add" className="absolute bottom-4 right-4" />
           </ContentBlock>
         </div>
 

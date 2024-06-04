@@ -1,13 +1,18 @@
+"use client";
+
 import { Button, ButtonProps } from "./ui/button";
 import { PlusIcon } from "@radix-ui/react-icons";
 
 type PetButtonProps = ButtonProps & {
-  action: "add" | "edit" | "checkout";
+  actionType: "add" | "edit" | "checkout";
 };
 
-export default function PetButton({ children, ...props }: PetButtonProps) {
-  const { action } = props;
-  if (action === "add") {
+export default function PetButton({
+  children,
+  actionType,
+  ...props
+}: PetButtonProps) {
+  if (actionType === "add") {
     return (
       <Button size="icon" {...props}>
         <PlusIcon className="h-6 w-6" />
@@ -15,7 +20,7 @@ export default function PetButton({ children, ...props }: PetButtonProps) {
     );
   }
 
-  if (action === "edit") {
+  if (actionType === "edit") {
     return (
       <Button variant="secondary" {...props}>
         {children}
@@ -23,7 +28,7 @@ export default function PetButton({ children, ...props }: PetButtonProps) {
     );
   }
 
-  if (action === "checkout") {
+  if (actionType === "checkout") {
     return (
       <Button variant="secondary" {...props}>
         {children}
