@@ -74,7 +74,7 @@ type PetKeyValueDetailProps = {
 
 const PetKeyValueDetail = ({ k, v }: PetKeyValueDetailProps) => (
   <div>
-    <h3 className="uppercase font-medium text-md text-zinc-700">{k}</h3>
+    <h3 className="uppercase font-medium text-sm text-zinc-700">{k}</h3>
     <p className="text-center text-base leading-7 text-zinc-800">{v}</p>
   </div>
 );

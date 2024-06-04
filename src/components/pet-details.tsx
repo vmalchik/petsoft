@@ -69,13 +69,13 @@ type PetKeyValueDetailProps = {
 
 const PetKeyValueDetail = ({ k, v }: PetKeyValueDetailProps) => (
   <div>
-    <h3 className="uppercase font-medium text-md text-zinc-700">{k}</h3>
+    <h3 className="uppercase font-medium text-sm text-zinc-700">{k}</h3>
     <p className="text-center text-base leading-7 text-zinc-800">{v}</p>
   </div>
 );
 
 const PetNotes = ({ pet }: PetProps) => (
-  <p className="flex-1 bg-white px-7 py-5 rounded-md mb-9 mx-8 border border-light">
+  <p className="flex-1 text-[15px] bg-white px-7 py-5 rounded-md mb-9 mx-8 border border-light">
     {pet.notes}
   </p>
 );

@@ -1,4 +1,5 @@
 "use client";
+import { useSearchContext } from "@/lib/hooks";
 import { Pet } from "@/lib/types";
 import { createContext, useState } from "react";
 
@@ -25,12 +26,16 @@ export default function PetContextProvider({
   children,
 }: PetContextProviderProps) {
   // state
-  const [pets, setPets] = useState<Pet[]>(data);
+  const [pets] = useState<Pet[]>(data);
   const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
+  const { searchQuery } = useSearchContext();
 
   // derived state
   const selectedPet = pets.find((pet) => pet.id === selectedPetId);
   const numPets = pets.length;
+  const filteredPets = pets.filter((pet) => {
+    return pet.name.toLowerCase().includes(searchQuery.toLowerCase());
+  });
 
   // event handlers
   const handleChangeSelectedPetId = (id: string) => {
@@ -40,7 +45,7 @@ export default function PetContextProvider({
   return (
     <PetContext.Provider
       value={{
-        pets,
+        pets: filteredPets,
         numPets,
         selectedPetId,
         selectedPet,

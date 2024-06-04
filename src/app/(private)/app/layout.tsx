@@ -7,6 +7,7 @@ import BackgroundPattern from "@/components/background-pattern";
 import Footer from "@/components/footer";
 import Header from "@/components/header";
 import PetContextProvider from "@/contexts/pet-context-provider";
+import SearchContextProvider from "@/contexts/search-context-provider";
 
 type PrivateLayoutProps = {
   readonly children: React.ReactNode;
@@ -27,7 +28,9 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
       {/* add padding to prevent page elements being next to edge of the browser window on smaller screen sizes */}
       <div className="min-h-screen max-w-[1050px] mx-auto px-4 flex flex-col">
         <Header />
-        <PetContextProvider data={data}>{children}</PetContextProvider>
+        <SearchContextProvider>
+          <PetContextProvider data={data}>{children}</PetContextProvider>
+        </SearchContextProvider>
         <Footer />
       </div>
     </>
