@@ -37,9 +37,6 @@ export default function HomePage() {
           access for $299.
         </p>
         <div className="mt-10 space-x-3">
-          {/* chadcn is built on top of Radix which offers components without styling but providing support for assistive technology */}
-          {/* chadcn is a styling layer on top of Radix UI */}
-          {/* asChild prop used to render link <a> tag instead of <button> tag for assistive technology that is still styled as a button */}
           <Button asChild>
             <Link href="/signup">Get started</Link>
           </Button>
