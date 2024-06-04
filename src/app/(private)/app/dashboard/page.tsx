@@ -1,5 +1,6 @@
 import Branding from "@/components/branding";
 import ContentBlock from "@/components/content-block";
+import PetButton from "@/components/pet-button";
 import PetDetails from "@/components/pet-details";
 import PetList from "@/components/pet-list";
 import SearchForm from "@/components/search-form";
@@ -19,9 +20,10 @@ export default async function DashboardPage() {
         </div>
 
         {/* start in row 2; grow the row down to end of the grid. take one column width of space */}
-        <div className="md:row-start-2 md:row-span-full md:col-start-1 md:col-span-1">
+        <div className="relative md:row-start-2 md:row-span-full md:col-start-1 md:col-span-1">
           <ContentBlock>
             <PetList />
+            <PetButton action="add" className="absolute bottom-4 right-4" />
           </ContentBlock>
         </div>
 

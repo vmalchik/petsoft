@@ -1,8 +1,8 @@
 "use client";
 import Image from "next/image";
-import { Button } from "./ui/button";
 import { usePetContext } from "@/lib/hooks";
 import { Pet } from "@/lib/types";
+import PetButton from "./pet-button";
 
 export default function PetDetails() {
   const { selectedPet } = usePetContext();
@@ -35,20 +35,18 @@ type PetProps = {
 };
 
 const PetDetailsHeader = ({ pet }: PetProps) => (
-  <div className="flex flex-wrap justify-between p-5 gap-4 bg-white border-b border-light">
-    <div className="flex items-center gap-4">
-      <Image
-        src={pet.imageUrl}
-        alt="Selected pet image"
-        width={75}
-        height={75}
-        className="w-[75px] h-[75px] rounded-full object-cover"
-      />
-      <h2 className="text-3xl font-semibold leading-7">{pet.name}</h2>
-    </div>
-    <div className="flex items-center gap-2 justify-end">
-      <Button variant="secondary">Edit</Button>
-      <Button variant="secondary">Checkout</Button>
+  <div className="flex flex-wrap items-center p-5 bg-white border-b border-light">
+    <Image
+      src={pet.imageUrl}
+      alt="Selected pet image"
+      width={75}
+      height={75}
+      className="w-[75px] h-[75px] rounded-full object-cover"
+    />
+    <h2 className="text-3xl ml-4 font-semibold leading-7">{pet.name}</h2>
+    <div className="ml-auto space-x-2">
+      <PetButton action="edit">Edit</PetButton>
+      <PetButton action="checkout">Checkout</PetButton>
     </div>
   </div>
 );
