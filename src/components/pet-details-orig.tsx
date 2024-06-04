@@ -33,7 +33,7 @@ type PetDetailsHeaderProps = {
 };
 
 const PetDetailsHeader = ({ src, name }: PetDetailsHeaderProps) => (
-  <div className="flex w-full flex-wrap justify-between p-5 gap-4 bg-white border-b border-black/[8%]">
+  <div className="flex w-full flex-wrap justify-between p-5 gap-4 bg-white border-b border-light">
     <div className="flex items-center gap-4">
       <Image
         src={src}
@@ -84,7 +84,7 @@ type PetNotesProps = {
 };
 
 const PetNotes = ({ notes }: PetNotesProps) => (
-  <p className="text-base bg-white h-full px-6 py-5 rounded-md border border-black/[8%]">
+  <p className="text-base bg-white h-full px-6 py-5 rounded-md border border-light">
     {notes}
   </p>
 );

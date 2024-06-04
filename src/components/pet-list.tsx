@@ -8,7 +8,7 @@ import { Button } from "./ui/button";
 export default function PetList() {
   const { pets } = usePetContext();
   return (
-    <ul className="bg-white border-b border-black/[0.08]">
+    <ul className="bg-white border-b border-light">
       {pets.map((pet) => (
         <PetItem key={pet.id} pet={pet} />
       ))}

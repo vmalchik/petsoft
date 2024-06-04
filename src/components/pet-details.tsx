@@ -35,7 +35,7 @@ type PetProps = {
 };
 
 const PetDetailsHeader = ({ pet }: PetProps) => (
-  <div className="flex flex-wrap justify-between p-5 gap-4 bg-white border-b border-black/[8%]">
+  <div className="flex flex-wrap justify-between p-5 gap-4 bg-white border-b border-light">
     <div className="flex items-center gap-4">
       <Image
         src={pet.imageUrl}
@@ -75,7 +75,7 @@ const PetKeyValueDetail = ({ k, v }: PetKeyValueDetailProps) => (
 );
 
 const PetNotes = ({ pet }: PetProps) => (
-  <p className="flex-1 bg-white px-7 py-5 rounded-md mb-9 mx-8 border border-black/[8%]">
+  <p className="flex-1 bg-white px-7 py-5 rounded-md mb-9 mx-8 border border-light">
     {pet.notes}
   </p>
 );
