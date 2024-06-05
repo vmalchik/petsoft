@@ -9,7 +9,7 @@ import { Pet } from "@/lib/types";
 type FormFields = {
   name: string;
   ownerName: string;
-  age: string;
+  age: number;
   imageUrl: string;
   notes: string;
 };
@@ -80,7 +80,7 @@ export default function PetForm({
     const newPet: Omit<Pet, "id"> = {
       name: formObject.name,
       ownerName: formObject.ownerName,
-      age: parseInt(formObject.age),
+      age: formObject.age,
       notes: formObject.notes,
       imageUrl: formObject.imageUrl || "/placeholder.svg",
     };
