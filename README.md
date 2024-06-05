@@ -4,6 +4,48 @@
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
+## Prisma + SQLite
+
+### Initialize Prisma with SQLite database (for local development)
+
+```sh
+npx prisma init --datasource-provider sqlite
+```
+
+### Development: Forcefully update database (for rapid prototyping)
+
+```sh
+npx prisma db push
+```
+
+### Production: Migrate database (safe updates)
+
+```sh
+npx prisma db migrate
+```
+
+### Seed Database
+
+```sh
+npx prisma db seed
+```
+
+Note: Depends on `package.json` having `prisma.seed` script.
+
+### Prisma Studio
+
+```sh
+npx prisma studio
+```
+
+**Studio**: http://localhost:5555
+
+### NextJS + Prisma Client
+
+Follow NextJS documentation best practice on how to use Prisma client in NextJS to avoid creation of many connections to database
+
+**Ref**: [NextJS Docs](https://www.prisma.io/docs/orm/more/help-and-troubleshooting/help-articles/nextjs-prisma-client-dev-practices)
+
 ## Getting Started
 
 First, run the development server:
