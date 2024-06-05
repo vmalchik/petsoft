@@ -6,13 +6,7 @@ import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import { Pet } from "@/lib/types";
 
-type FormFields = {
-  name: string;
-  ownerName: string;
-  age: number;
-  imageUrl: string;
-  notes: string;
-};
+type FormFields = Omit<Pet, "id">;
 
 type Field = {
   label: string;
@@ -59,11 +53,33 @@ type PetFormProps = {
   onFormSubmission: () => void;
 };
 
+const PLACE_HOLDER_IMAGE_URL = "/placeholder.svg";
+
+const setDefaultValue = (
+  actionType: "add" | "edit",
+  fieldName: keyof FormFields,
+  pet?: Pet
+) => {
+  let value = undefined;
+  if (pet && actionType === "edit") {
+    if (
+      fieldName === "imageUrl" &&
+      pet?.[fieldName] === PLACE_HOLDER_IMAGE_URL
+    ) {
+      // don't set a default value for image URL if it's the placeholder image
+      value = undefined;
+    } else {
+      value = pet?.[fieldName];
+    }
+  }
+  return value;
+};
+
 export default function PetForm({
   actionType,
   onFormSubmission,
 }: PetFormProps) {
-  const { handleAddPet } = usePetContext();
+  const { handleAddPet, selectedPet: pet } = usePetContext();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -82,7 +98,7 @@ export default function PetForm({
       ownerName: formObject.ownerName,
       age: formObject.age,
       notes: formObject.notes,
-      imageUrl: formObject.imageUrl || "/placeholder.svg",
+      imageUrl: formObject.imageUrl || PLACE_HOLDER_IMAGE_URL,
     };
 
     // const newPet: Omit<Pet, "id"> = {
@@ -111,9 +127,21 @@ export default function PetForm({
               {/* name attribute is used to reference elements in JS or form data after a form is submitted */}
               <Label htmlFor={name}>{label}</Label>
               {type === "textarea" ? (
-                <Textarea id={name} name={name} rows={3} required={required} />
+                <Textarea
+                  id={name}
+                  name={name}
+                  rows={3}
+                  required={required}
+                  defaultValue={setDefaultValue(actionType, name, pet)}
+                />
               ) : (
-                <Input id={name} name={name} type={type} required={required} />
+                <Input
+                  id={name}
+                  name={name}
+                  type={type}
+                  required={required}
+                  defaultValue={setDefaultValue(actionType, name, pet)}
+                />
               )}
             </div>
           );
