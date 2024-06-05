@@ -10,6 +10,7 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 import PetForm from "./pet-form";
+import { useState } from "react";
 
 type PetButtonProps = ButtonProps & {
   actionType: "add" | "edit" | "checkout";
@@ -20,6 +21,8 @@ export default function PetButton({
   actionType,
   ...props
 }: PetButtonProps) {
+  const [open, setOpen] = useState(false);
+
   if (actionType === "checkout") {
     return (
       <Button variant="secondary" {...props}>
@@ -28,7 +31,7 @@ export default function PetButton({
     );
   }
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={() => setOpen((prev) => !prev)}>
       <DialogTrigger asChild>
         {actionType === "add" ? (
           <Button size="icon" {...props}>
@@ -51,7 +54,10 @@ export default function PetButton({
             </>
           </DialogTitle>
         </DialogHeader>
-        <PetForm actionType={actionType} />
+        <PetForm
+          actionType={actionType}
+          onFormSubmission={() => setOpen(false)}
+        />
       </DialogContent>
     </Dialog>
   );
