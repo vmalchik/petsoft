@@ -6,21 +6,24 @@
 import BackgroundPattern from "@/components/background-pattern";
 import Footer from "@/components/footer";
 import Header from "@/components/header";
+import { Toaster } from "@/components/ui/sonner";
 import PetContextProvider from "@/contexts/pet-context-provider";
 import SearchContextProvider from "@/contexts/search-context-provider";
+import prisma from "@/lib/db";
 
 type PrivateLayoutProps = {
   readonly children: React.ReactNode;
 };
 
 export default async function PrivateLayout({ children }: PrivateLayoutProps) {
-  const response = await fetch(
-    "https://www.bytegrad.com/course-assets/projects/petsoft/api/pets"
-  );
-  if (!response.ok) {
-    throw new Error("Failed to fetch pets");
-  }
-  const data = await response.json();
+  const pets = await prisma.pet.findMany(); // could specify filter like so: { where: { id: 1 } }
+  // const response = await fetch(
+  //   "https://www.bytegrad.com/course-assets/projects/petsoft/api/pets"
+  // );
+  // if (!response.ok) {
+  //   throw new Error("Failed to fetch pets");
+  // }
+  // const data = await response.json();
   return (
     <>
       <BackgroundPattern />
@@ -29,10 +32,11 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
       <div className="min-h-screen max-w-[1050px] mx-auto px-4 flex flex-col">
         <Header />
         <SearchContextProvider>
-          <PetContextProvider data={data}>{children}</PetContextProvider>
+          <PetContextProvider pets={pets}>{children}</PetContextProvider>
         </SearchContextProvider>
         <Footer />
       </div>
+      <Toaster position="top-right" />
     </>
   );
 }

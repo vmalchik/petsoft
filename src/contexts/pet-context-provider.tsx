@@ -1,4 +1,5 @@
 "use client";
+import { addPet } from "@/actions/actions";
 import { useSearchContext } from "@/lib/hooks";
 import { Pet } from "@/lib/types";
 import { createContext, useState } from "react";
@@ -15,7 +16,7 @@ type TPetContext = {
 };
 
 type PetContextProviderProps = {
-  data: Pet[];
+  pets: Pet[];
   children: React.ReactNode;
 };
 
@@ -25,17 +26,18 @@ export const PetContext = createContext<TPetContext | null>(null);
 // https://medium.com/@mak-dev/zustand-with-next-js-14-server-components-da9c191b73df#:~:text=Server%2Dside%20components%20are%20meant,%E2%80%9Cstate%E2%80%9D%20inside%20the%20server.
 
 export default function PetContextProvider({
-  data,
+  pets,
   children,
 }: PetContextProviderProps) {
   // state
-  const [pets, setPets] = useState<Pet[]>(data);
+  // const [pets, setPets] = useState<Pet[]>(data);
   const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
   const { searchQuery } = useSearchContext();
 
   // derived state
   const selectedPet = pets.find((pet) => pet.id === selectedPetId);
   const numPets = pets.length;
+  // todo - useMemo for performance
   const filteredPets = pets.filter((pet) => {
     return pet.name.toLowerCase().includes(searchQuery.toLowerCase());
   });
@@ -46,25 +48,28 @@ export default function PetContextProvider({
   };
 
   const handleCheckoutPet = (id: string) => {
-    setPets((prevPets) => prevPets.filter((pet) => pet.id !== id));
-    setSelectedPetId(null);
+    // setPets((prevPets) => prevPets.filter((pet) => pet.id !== id));
+    // setSelectedPetId(null);
   };
 
-  const handleAddPet = (pet: Omit<Pet, "id">) => {
-    const id = Date.now().toString();
-    setPets((prevPets) => [...prevPets, { ...pet, id }]);
+  const handleAddPet = async (pet: Omit<Pet, "id">) => {
+    // const id = Date.now().toString();
+    // setPets((prevPets) => [...prevPets, { ...pet, id }]);
+
+    // call server action from the client side
+    await addPet(pet);
   };
 
   const handleEditPet = (petId: string, pet: Omit<Pet, "id">) => {
-    setPets((prevPets) => {
-      const updatedPets = prevPets.map((p) => {
-        if (p.id === petId) {
-          return { ...pet, id: petId };
-        }
-        return p;
-      });
-      return updatedPets;
-    });
+    // setPets((prevPets) => {
+    //   const updatedPets = prevPets.map((p) => {
+    //     if (p.id === petId) {
+    //       return { ...pet, id: petId };
+    //     }
+    //     return p;
+    //   });
+    //   return updatedPets;
+    // });
   };
 
   return (
