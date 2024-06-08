@@ -3,12 +3,8 @@ import { usePetContext } from "@/lib/hooks";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
-import { Button } from "./ui/button";
 import { Pet } from "@/lib/types";
-import { addPet, editPet } from "@/actions/actions";
 import PetFormBtn from "./pet-form-btn";
-import { toast } from "sonner";
-import { useFormState } from "react-dom";
 
 type FormFields = Omit<Pet, "id">;
 
@@ -83,9 +79,7 @@ export default function PetForm({
   actionType,
   onFormSubmission,
 }: PetFormProps) {
-  // const { handleAddPet, selectedPet: pet, handleEditPet } = usePetContext();
-  const { selectedPet: pet } = usePetContext();
-
+  const { handleAddPet, selectedPet: pet, handleEditPet } = usePetContext();
   // note: could use useFormState hook but you would need to pass it as like so action={formAction}
   //       best for progressive-enhancement (e.g. devices that are not running JS or have JS disabled or slow)
   // useFormState to deal with form error state; pass initial state and server action to be performed.
@@ -93,74 +87,40 @@ export default function PetForm({
   // const initialState = {};
   // const [error, formAction] = useFormState(addPet, initialState);
 
-  // const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-  //   event.preventDefault();
+  const handleAction = async (formData: FormData) => {
+    onFormSubmission();
 
-  //   // FormData is a built-in JS object that allows you to capture form data
-  //   const formData = new FormData(event.currentTarget);
+    // Object.fromEntries() is a built-in JS method that converts a list of key-value pairs into an object
+    const formObject: FormFields = Object.fromEntries(
+      formData.entries()
+    ) as unknown as FormFields;
 
-  //   // Object.fromEntries() is a built-in JS method that converts a list of key-value pairs into an object
-  //   const formObject: FormFields = Object.fromEntries(
-  //     formData.entries()
-  //   ) as unknown as FormFields;
+    // Omit is a utility type that allows you to create a new type by excluding certain properties from an existing type
+    const newPet: Omit<Pet, "id"> = {
+      name: formObject.name,
+      ownerName: formObject.ownerName,
+      age: parseInt(formObject.age as unknown as string), // form data is always a string
+      notes: formObject.notes,
+      imageUrl: formObject.imageUrl || PLACE_HOLDER_IMAGE_URL,
+    };
 
-  //   // Omit is a utility type that allows you to create a new type by excluding certain properties from an existing type
-  //   const newPet: Omit<Pet, "id"> = {
-  //     name: formObject.name,
-  //     ownerName: formObject.ownerName,
-  //     age: parseInt(formObject.age as unknown as string), // form data is always a string
-  //     notes: formObject.notes,
-  //     imageUrl: formObject.imageUrl || PLACE_HOLDER_IMAGE_URL,
-  //   };
+    // const newPet: Omit<Pet, "id"> = {
+    //   name: formData.get("name") as string,
+    //   ownerName: formData.get("ownerName") as string,
+    //   age: parseInt(formData.get("age") as string),
+    //   imageUrl: (formData.get("imageUrl") as string) || "/placeholder.svg",
+    //   notes: formData.get("notes") as string,
+    // };
 
-  //   // const newPet: Omit<Pet, "id"> = {
-  //   //   name: formData.get("name") as string,
-  //   //   ownerName: formData.get("ownerName") as string,
-  //   //   age: parseInt(formData.get("age") as string),
-  //   //   imageUrl: (formData.get("imageUrl") as string) || "/placeholder.svg",
-  //   //   notes: formData.get("notes") as string,
-  //   // };
-
-  //   if (actionType === "add") {
-  //     handleAddPet(newPet);
-  //   } else if (pet?.id && actionType === "edit") {
-  //     handleEditPet(pet.id, newPet);
-  //   }
-
-  //   onFormSubmission();
-  // };
+    if (actionType === "add") {
+      await handleAddPet(newPet);
+    } else if (actionType === "edit") {
+      await handleEditPet(pet!.id, newPet);
+    }
+  };
 
   return (
-    // original
-    // <form onSubmit={handleSubmit}>
-
-    // ideal (progressive enhancement)
-    // action will work even if javascript is disabled or has not been loaded
-    // this is called - progressive enhancement; benefits: smaller bundle size, faster load time, better SEO
-    // <form action={addPet}>
-
-    // realistic
-    // but we need to perform other UI changes upon form submission, so we lose progressive enhancement benefits here to do so
-    <form
-      action={async (formData) => {
-        let error;
-        if (actionType === "add") {
-          error = await addPet(formData);
-        } else if (pet?.id && actionType === "edit") {
-          error = await editPet(pet.id, formData);
-        } else {
-          console.error("Invalid action type");
-          error = { message: "Unexpected error" };
-        }
-
-        if (error) {
-          console.log(error);
-          toast.warning(error.message);
-          return;
-        }
-        onFormSubmission(); // note - should disable submit button if the form is being submitted
-      }}
-    >
+    <form action={async (formData) => await handleAction(formData)}>
       <div className="space-y-3">
         {fields.map((field) => {
           const { label, name, type, required } = field;
@@ -193,12 +153,6 @@ export default function PetForm({
 
       <div className="text-right mt-5">
         <PetFormBtn actionType={actionType} />
-        {/* <Button type="submit">
-          <>
-            {actionType === "add" && "Add"}
-            {actionType === "edit" && "Update"}
-          </>
-        </Button> */}
       </div>
     </form>
   );

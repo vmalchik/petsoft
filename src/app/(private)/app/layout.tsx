@@ -32,7 +32,7 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
       <div className="min-h-screen max-w-[1050px] mx-auto px-4 flex flex-col">
         <Header />
         <SearchContextProvider>
-          <PetContextProvider pets={pets}>{children}</PetContextProvider>
+          <PetContextProvider data={pets}>{children}</PetContextProvider>
         </SearchContextProvider>
         <Footer />
       </div>

@@ -11,6 +11,7 @@ import {
 } from "./ui/dialog";
 import PetForm from "./pet-form";
 import { useState } from "react";
+import { flushSync } from "react-dom";
 
 type PetButtonProps = ButtonProps & {
   actionType: "add" | "edit" | "checkout";
@@ -56,7 +57,13 @@ export default function PetButton({
         </DialogHeader>
         <PetForm
           actionType={actionType}
-          onFormSubmission={() => setOpen(false)}
+          onFormSubmission={() => {
+            // setOpen(false);
+            // force a re-render if state change batching is causing ui issues
+            flushSync(() => {
+              setOpen(false);
+            });
+          }}
         />
       </DialogContent>
     </Dialog>
