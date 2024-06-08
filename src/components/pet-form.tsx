@@ -5,7 +5,7 @@ import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import { Pet } from "@/lib/types";
-import { addPet } from "@/actions/actions";
+import { addPet, editPet } from "@/actions/actions";
 import PetFormBtn from "./pet-form-btn";
 import { toast } from "sonner";
 import { useFormState } from "react-dom";
@@ -143,7 +143,16 @@ export default function PetForm({
     // but we need to perform other UI changes upon form submission, so we lose progressive enhancement benefits here to do so
     <form
       action={async (formData) => {
-        const error = await addPet(formData);
+        let error;
+        if (actionType === "add") {
+          error = await addPet(formData);
+        } else if (pet?.id && actionType === "edit") {
+          error = await editPet(pet.id, formData);
+        } else {
+          console.error("Invalid action type");
+          error = { message: "Unexpected error" };
+        }
+
         if (error) {
           console.log(error);
           toast.warning(error.message);

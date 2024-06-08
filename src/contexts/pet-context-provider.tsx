@@ -36,6 +36,7 @@ export default function PetContextProvider({
 
   // derived state
   const selectedPet = pets.find((pet) => pet.id === selectedPetId);
+  console.log("selectedPet", selectedPet);
   const numPets = pets.length;
   // todo - useMemo for performance
   const filteredPets = pets.filter((pet) => {
