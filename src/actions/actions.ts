@@ -4,12 +4,10 @@ import "server-only";
 import prisma from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { Pet } from "@/lib/types";
-import { sleep } from "@/lib/utils";
 
 // perform update and revalidate the layout page in a single function and single network request
 export const addPet = async (pet: Omit<Pet, "id">) => {
   try {
-    await sleep(3000);
     const newPet = await prisma.pet.create({ data: pet });
     // revalidate the layout page because that is where we do the fetching for app/dashboard which
     // since we do the fetch in layout we need to specify app as route and layout as location
@@ -28,7 +26,6 @@ export const addPet = async (pet: Omit<Pet, "id">) => {
 
 export const editPet = async (petId: string, pet: Omit<Pet, "id">) => {
   try {
-    await sleep(3000);
     const updatedPet = await prisma.pet.update({
       where: { id: petId },
       data: pet,
@@ -49,7 +46,6 @@ export const editPet = async (petId: string, pet: Omit<Pet, "id">) => {
 
 export const deletePet = async (petId: string) => {
   try {
-    await sleep(3000);
     const deletedPet = await prisma.pet.delete({
       where: { id: petId },
     });

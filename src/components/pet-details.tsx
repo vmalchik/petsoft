@@ -3,6 +3,7 @@ import Image from "next/image";
 import { usePetContext } from "@/lib/hooks";
 import { Pet } from "@/lib/types";
 import PetButton from "./pet-button";
+import { NEW_PET_TEMP_ID_PREFIX } from "@/lib/constants";
 
 export default function PetDetails() {
   const { selectedPet } = usePetContext();
@@ -35,8 +36,8 @@ type PetProps = {
 };
 
 const PetDetailsHeader = ({ pet }: PetProps) => {
-  const { handleCheckoutPet } = usePetContext();
-
+  const { handleCheckoutPet, selectedPetId } = usePetContext();
+  const disabled = selectedPetId?.startsWith(NEW_PET_TEMP_ID_PREFIX);
   return (
     <div className="flex flex-wrap items-center p-5 bg-white border-b border-light">
       <Image
@@ -49,9 +50,12 @@ const PetDetailsHeader = ({ pet }: PetProps) => {
 
       <h2 className="text-3xl ml-4 font-semibold leading-7">{pet.name}</h2>
       <div className="ml-auto space-x-2">
-        <PetButton actionType="edit">Edit</PetButton>
+        <PetButton actionType="edit" disabled={disabled}>
+          Edit
+        </PetButton>
         <PetButton
           actionType="checkout"
+          disabled={disabled}
           onClick={async () => await handleCheckoutPet(pet.id)}
         >
           Checkout

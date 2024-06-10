@@ -1,5 +1,6 @@
 "use client";
 import { addPet, deletePet, editPet } from "@/actions/actions";
+import { NEW_PET_TEMP_ID_PREFIX } from "@/lib/constants";
 import { useSearchContext } from "@/lib/hooks";
 import { Pet } from "@/lib/types";
 import {
@@ -9,6 +10,7 @@ import {
   startTransition,
   useEffect,
   useMemo,
+  useRef,
 } from "react";
 import { toast } from "sonner";
 
@@ -64,6 +66,13 @@ export default function PetContextProvider({
   children,
 }: PetContextProviderProps) {
   // state
+  const { searchQuery } = useSearchContext();
+  const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
+
+  // 'tempPet' variable is a fix for optimistic updates causing newly added
+  // to flicker in UI when selected by user before the server response
+  const tempPet = useRef<Pet | null>(null);
+
   const [optimisticPets, setOptimisticPets] = useOptimistic(
     data,
     (state, { action, payload }: OptimisticPetsChanges) => {
@@ -79,28 +88,38 @@ export default function PetContextProvider({
       }
     }
   );
-  const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
-  const { searchQuery } = useSearchContext();
-
-  // todo - look into showing newly added pet without flicker after optimistic update
-  // const [selectedPet, setSelectedPet] = useState<Pet | undefined>();
-  // useEffect(() => {
-  //   if (!selectedPet && selectedPetId) {
-  //     setSelectedPet(optimisticPets.find((pet) => pet.id === selectedPetId));
-  //   } else if (selectedPet && !selectedPetId?.startsWith("temp")) {
-  //     setSelectedPet(optimisticPets.find((pet) => pet.id === selectedPetId));
-  //   }
-  // }, [selectedPet, selectedPetId, optimisticPets]);
 
   // derived state
-  const selectedPet = optimisticPets.find((pet) => pet.id === selectedPetId);
   const numPets = optimisticPets.length;
-  // todo - useMemo for performance
-  const filteredPets = optimisticPets.filter((pet) => {
-    return pet.name.toLowerCase().includes(searchQuery.toLowerCase());
-  });
+
+  const selectedPet = useMemo(() => {
+    if (selectedPetId === tempPet.current?.id) {
+      return tempPet.current;
+    }
+    return optimisticPets.find((pet) => pet.id === selectedPetId);
+  }, [optimisticPets, selectedPetId]);
+
+  const filteredPets = useMemo(() => {
+    return optimisticPets.filter((pet) => {
+      return pet.name.toLowerCase().includes(searchQuery.toLowerCase());
+    });
+  }, [searchQuery, optimisticPets]);
 
   // event handlers
+  useEffect(() => {
+    // if a new pet is added, select it
+    if (tempPet.current?.id) {
+      setSelectedPetId(tempPet.current.id);
+    }
+  }, [optimisticPets.length]);
+
+  useEffect(() => {
+    // reset tempPet if user selects another pet
+    if (selectedPetId !== tempPet.current?.id) {
+      tempPet.current = null;
+    }
+  }, [selectedPetId]);
+
   const handleChangeSelectedPetId = (id: string) => {
     setSelectedPetId(id);
   };
@@ -124,20 +143,30 @@ export default function PetContextProvider({
   };
 
   const handleAddPet = async (pet: Omit<Pet, "id">) => {
-    const id = `temp-${Date.now()}`;
+    const id = `${NEW_PET_TEMP_ID_PREFIX}-${Date.now()}`;
     const newPet = { ...pet, id };
-    startTransition(() => {
-      setOptimisticPets({
-        action: OptimisticPetActions.add,
-        payload: { pet: newPet },
-      });
+    tempPet.current = newPet;
+    setOptimisticPets({
+      action: OptimisticPetActions.add,
+      payload: { pet: newPet },
     });
+
     const response = await addPet(pet);
-    // todo - fix flicker when adding new pet
-    // if (response.pet) {
-    //   setSelectedPetId((prev) => (prev === newPet.id ? response.pet.id : prev));
-    // }
-    response.error && handleError(response.error);
+    if (response.error) {
+      tempPet.current = null;
+      handleError(response.error);
+      setOptimisticPets({
+        action: OptimisticPetActions.delete,
+        payload: { id },
+      });
+    } else if (response?.pet?.id) {
+      // if user hasn't selected another pet before the server response
+      // smooth update ui with the new pet id from the server without flicker
+      if (tempPet.current?.id === id) {
+        tempPet.current = response.pet;
+        setSelectedPetId(response.pet.id);
+      }
+    }
   };
 
   const handleEditPet = async (petId: string, pet: Omit<Pet, "id">) => {
