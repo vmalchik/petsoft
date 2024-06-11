@@ -1,17 +1,12 @@
 "use client";
 import { addPet, deletePet, editPet } from "@/actions/actions";
 import { NEW_PET_TEMP_ID_PREFIX } from "@/lib/constants";
-import { useSearchContext } from "@/lib/hooks";
-import { Pet } from "@/lib/types";
 import {
-  createContext,
-  useOptimistic,
-  useState,
-  startTransition,
-  useEffect,
-  useMemo,
-  useRef,
-} from "react";
+  useSearchContext,
+  useSelectedPetWithOptimisticCreate,
+} from "@/lib/hooks";
+import { Pet } from "@/lib/types";
+import { createContext, useOptimistic, startTransition, useMemo } from "react";
 import { toast } from "sonner";
 
 type TPetContext = {
@@ -67,11 +62,6 @@ export default function PetContextProvider({
 }: PetContextProviderProps) {
   // state
   const { searchQuery } = useSearchContext();
-  const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
-
-  // 'tempPet' variable is a fix for optimistic updates causing newly added
-  // to flicker in UI when selected by user before the server response
-  const tempPet = useRef<Pet | null>(null);
 
   const [optimisticPets, setOptimisticPets] = useOptimistic(
     data,
@@ -89,40 +79,22 @@ export default function PetContextProvider({
     }
   );
 
+  const {
+    selectedPetId,
+    selectedPet,
+    handleChangeSelectedPetId,
+    handleOptimisticCreatedPet,
+    handleResolvedCreatedPet,
+  } = useSelectedPetWithOptimisticCreate(optimisticPets);
+
   // derived state
   const numPets = optimisticPets.length;
-
-  const selectedPet = useMemo(() => {
-    if (selectedPetId === tempPet.current?.id) {
-      return tempPet.current;
-    }
-    return optimisticPets.find((pet) => pet.id === selectedPetId);
-  }, [optimisticPets, selectedPetId]);
 
   const filteredPets = useMemo(() => {
     return optimisticPets.filter((pet) => {
       return pet.name.toLowerCase().includes(searchQuery.toLowerCase());
     });
   }, [searchQuery, optimisticPets]);
-
-  // event handlers
-  useEffect(() => {
-    // if a new pet is added, select it
-    if (tempPet.current?.id) {
-      setSelectedPetId(tempPet.current.id);
-    }
-  }, [optimisticPets.length]);
-
-  useEffect(() => {
-    // reset tempPet if user selects another pet
-    if (selectedPetId !== tempPet.current?.id) {
-      tempPet.current = null;
-    }
-  }, [selectedPetId]);
-
-  const handleChangeSelectedPetId = (id: string) => {
-    setSelectedPetId(id);
-  };
 
   const handleError = (error: any) => {
     if (error?.message) {
@@ -131,7 +103,7 @@ export default function PetContextProvider({
   };
 
   const handleCheckoutPet = async (id: string) => {
-    setSelectedPetId(null);
+    handleChangeSelectedPetId(null);
     startTransition(() => {
       setOptimisticPets({
         action: OptimisticPetActions.delete,
@@ -143,9 +115,9 @@ export default function PetContextProvider({
   };
 
   const handleAddPet = async (pet: Omit<Pet, "id">) => {
-    const id = `${NEW_PET_TEMP_ID_PREFIX}-${Date.now()}`;
-    const newPet = { ...pet, id };
-    tempPet.current = newPet;
+    const tempId = `${NEW_PET_TEMP_ID_PREFIX}-${Date.now()}`;
+    const newPet = { ...pet, id: tempId };
+    handleOptimisticCreatedPet(newPet);
     setOptimisticPets({
       action: OptimisticPetActions.add,
       payload: { pet: newPet },
@@ -153,19 +125,13 @@ export default function PetContextProvider({
 
     const response = await addPet(pet);
     if (response.error) {
-      tempPet.current = null;
       handleError(response.error);
       setOptimisticPets({
         action: OptimisticPetActions.delete,
-        payload: { id },
+        payload: { id: tempId },
       });
     } else if (response?.pet?.id) {
-      // if user hasn't selected another pet before the server response
-      // smooth update ui with the new pet id from the server without flicker
-      if (tempPet.current?.id === id) {
-        tempPet.current = response.pet;
-        setSelectedPetId(response.pet.id);
-      }
+      handleResolvedCreatedPet(response.pet, tempId);
     }
   };
 
