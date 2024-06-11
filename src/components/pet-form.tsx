@@ -58,7 +58,7 @@ const PLACE_HOLDER_IMAGE_URL = "/placeholder.svg";
 const setDefaultValue = (
   actionType: "add" | "edit",
   fieldName: keyof FormFields,
-  pet?: ClientPet
+  pet?: ClientPet | null
 ) => {
   let value = undefined;
   if (pet && actionType === "edit") {

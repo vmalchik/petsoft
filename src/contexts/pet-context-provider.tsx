@@ -13,7 +13,7 @@ type TPetContext = {
   pets: ClientPet[];
   numPets: number;
   selectedPetId: ClientPet["id"] | null;
-  selectedPet: ClientPet | undefined;
+  selectedPet: ClientPet | null;
   handleChangeSelectedPetId: (id: ClientPet["id"]) => void;
   handleCheckoutPet: (id: ClientPet["id"]) => Promise<void>;
   handleAddPet: (pet: NewPet) => Promise<void>;

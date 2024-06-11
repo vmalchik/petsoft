@@ -2,6 +2,7 @@ import { PetContext } from "@/contexts/pet-context-provider";
 import { SearchContext } from "@/contexts/search-context-provider";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { ClientPet } from "./types";
+import { NEW_PET_TEMP_ID_PREFIX } from "./constants";
 
 export function usePetContext() {
   const context = useContext(PetContext);
@@ -30,11 +31,16 @@ export function useSelectedPetWithOptimisticCreate(pets: ClientPet[]) {
   );
 
   // derived state
-  const selectedPet = useMemo(() => {
+  const selectedPet = useMemo<ClientPet | null>(() => {
+    // Check order matters here
+    // Prioritize showing non-pending pet
+    const pet = pets.find((pet) => pet.id === selectedPetId);
+    if (pet) return pet;
+    // Check and show pending pet if selected
     if (selectedPetId === pendingNewPet.current?.id) {
       return pendingNewPet.current;
     }
-    return pets.find((pet) => pet.id === selectedPetId);
+    return null;
   }, [pets, selectedPetId]);
 
   // event handlers
@@ -48,6 +54,10 @@ export function useSelectedPetWithOptimisticCreate(pets: ClientPet[]) {
   useEffect(() => {
     // reset pendingNewPet if user selects another pet
     if (selectedPetId !== pendingNewPet.current?.id) {
+      pendingNewPet.current = null;
+    }
+    // reset pendingNewPet if pendingNewPet has been resolved
+    if (!pendingNewPet.current?.id.startsWith(NEW_PET_TEMP_ID_PREFIX)) {
       pendingNewPet.current = null;
     }
   }, [selectedPetId]);
@@ -67,8 +77,8 @@ export function useSelectedPetWithOptimisticCreate(pets: ClientPet[]) {
     // if user hasn't selected another pet before the server response
     // smooth update ui with the new pet id from the server without flicker
     if (pendingNewPet.current?.id === tempId) {
-      pendingNewPet.current = newPet;
-      setSelectedPetId(newPet.id);
+      pendingNewPet.current = newPet; // prevents flicker in components depending on selected pet
+      setSelectedPetId(newPet.id); // schedules re-render of selected pet
     }
   };
 
