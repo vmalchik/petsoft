@@ -1,6 +1,6 @@
 "use client";
 import { usePetContext } from "@/lib/hooks";
-import { Pet } from "@/lib/types";
+import { ClientPet } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { Button } from "./ui/button";
@@ -17,7 +17,7 @@ export default function PetList() {
 }
 
 type PetItemProps = {
-  pet: Pet;
+  pet: ClientPet;
 };
 
 const PetItem = ({ pet }: PetItemProps) => {

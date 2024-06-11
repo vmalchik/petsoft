@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { usePetContext } from "@/lib/hooks";
-import { Pet } from "@/lib/types";
+import { ClientPet } from "@/lib/types";
 import PetButton from "./pet-button";
 import { NEW_PET_TEMP_ID_PREFIX } from "@/lib/constants";
 
@@ -32,7 +32,7 @@ const EmptyView = () => (
 );
 
 type PetProps = {
-  pet: Pet;
+  pet: ClientPet;
 };
 
 const PetDetailsHeader = ({ pet }: PetProps) => {

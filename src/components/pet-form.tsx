@@ -3,10 +3,10 @@ import { usePetContext } from "@/lib/hooks";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
-import { Pet } from "@/lib/types";
+import { NewPet, ClientPet } from "@/lib/types";
 import PetFormBtn from "./pet-form-btn";
 
-type FormFields = Omit<Pet, "id">;
+type FormFields = NewPet;
 
 type Field = {
   label: string;
@@ -58,7 +58,7 @@ const PLACE_HOLDER_IMAGE_URL = "/placeholder.svg";
 const setDefaultValue = (
   actionType: "add" | "edit",
   fieldName: keyof FormFields,
-  pet?: Pet
+  pet?: ClientPet
 ) => {
   let value = undefined;
   if (pet && actionType === "edit") {
@@ -96,7 +96,7 @@ export default function PetForm({
     ) as unknown as FormFields;
 
     // Omit is a utility type that allows you to create a new type by excluding certain properties from an existing type
-    const newPet: Omit<Pet, "id"> = {
+    const newPet: NewPet = {
       name: formObject.name,
       ownerName: formObject.ownerName,
       age: parseInt(formObject.age as unknown as string), // form data is always a string
@@ -115,7 +115,12 @@ export default function PetForm({
     if (actionType === "add") {
       await handleAddPet(newPet);
     } else if (actionType === "edit") {
-      await handleEditPet(pet!.id, newPet);
+      const updatedPet: ClientPet = {
+        ...pet,
+        ...newPet,
+        id: pet!.id,
+      };
+      await handleEditPet(updatedPet.id, updatedPet);
     }
   };
 

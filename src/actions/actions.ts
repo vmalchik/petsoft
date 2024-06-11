@@ -3,10 +3,10 @@
 import "server-only";
 import prisma from "@/lib/db";
 import { revalidatePath } from "next/cache";
-import { Pet } from "@/lib/types";
+import { NewPet, ClientPet } from "@/lib/types";
 
 // perform update and revalidate the layout page in a single function and single network request
-export const addPet = async (pet: Omit<Pet, "id">) => {
+export const addPet = async (pet: NewPet) => {
   try {
     const newPet = await prisma.pet.create({ data: pet });
     // revalidate the layout page because that is where we do the fetching for app/dashboard which
@@ -24,7 +24,7 @@ export const addPet = async (pet: Omit<Pet, "id">) => {
   }
 };
 
-export const editPet = async (petId: string, pet: Omit<Pet, "id">) => {
+export const editPet = async (petId: ClientPet["id"], pet: ClientPet) => {
   try {
     const updatedPet = await prisma.pet.update({
       where: { id: petId },
@@ -44,7 +44,7 @@ export const editPet = async (petId: string, pet: Omit<Pet, "id">) => {
   }
 };
 
-export const deletePet = async (petId: string) => {
+export const deletePet = async (petId: ClientPet["id"]) => {
   try {
     const deletedPet = await prisma.pet.delete({
       where: { id: petId },

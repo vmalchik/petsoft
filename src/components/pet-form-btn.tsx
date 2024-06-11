@@ -1,17 +1,17 @@
 "use client";
 import React from "react";
 import { Button } from "./ui/button";
-import { useFormStatus } from "react-dom";
 
 type PetFormBtnProps = {
   actionType: "add" | "edit";
 };
 
 export default function PetFormBtn({ actionType }: PetFormBtnProps) {
-  const { pending } = useFormStatus();
+  // To use useFormStatus the component must be a child of a Form component
+  // const { pending } = useFormStatus(); // replaced with optimistic updates
 
   return (
-    <Button type="submit" disabled={pending}>
+    <Button type="submit">
       <>
         {actionType === "add" && "Add"}
         {actionType === "edit" && "Update"}
