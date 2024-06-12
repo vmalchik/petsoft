@@ -3,16 +3,23 @@
 import "server-only";
 import prisma from "@/lib/db";
 import { revalidatePath } from "next/cache";
-import { NewPet, ClientPet } from "@/lib/types";
+import type { ClientPet } from "@/lib/types";
+import { PetFormSchema } from "@/lib/validations";
 
-// perform update and revalidate the layout page in a single function and single network request
-export const addPet = async (pet: NewPet) => {
+// server actions perform update and revalidate the layout page in a single function and single network request
+// we cannot trust input from the client so input type will initially be unknown until validation is done
+export const addPet = async (pet: unknown) => {
   try {
-    const newPet = await prisma.pet.create({ data: pet });
+    const validatedPet = PetFormSchema.safeParse(pet);
+    if (!validatedPet.success) {
+      throw new Error("Invalid pet data");
+    }
+
+    const createdPet = await prisma.pet.create({ data: validatedPet.data });
     // revalidate the layout page because that is where we do the fetching for app/dashboard which
     // since we do the fetch in layout we need to specify app as route and layout as location
     revalidatePath("/app", "layout");
-    return { pet: newPet };
+    return { pet: createdPet };
   } catch (error) {
     console.error(`Failed to add pet: ${error}`);
     // server to return an object with a message property

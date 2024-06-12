@@ -3,48 +3,46 @@ import { usePetContext } from "@/lib/hooks";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
-import { NewPet, ClientPet } from "@/lib/types";
+import type { ClientPet } from "@/lib/types";
 import PetFormBtn from "./pet-form-btn";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { PetFormSchema } from "@/lib/validations";
 
-type FormFields = NewPet;
+type TPetForm = z.infer<typeof PetFormSchema>;
 
-type Field = {
+type Field<K extends keyof TPetForm> = {
   label: string;
-  name: keyof FormFields;
-  type: string;
-  required: boolean;
+  name: K; // enforce to be one one of the keys of TPetForm such as "name", "ownerName", etc.
+  type: "text" | "number" | "textarea";
 };
 
-const fields: Field[] = [
+const fields: Field<keyof TPetForm>[] = [
   {
     label: "Name",
     name: "name",
     type: "text",
-    required: true,
   },
   {
     label: "Owner Name",
     name: "ownerName",
     type: "text",
-    required: true,
   },
   {
     label: "Age",
     name: "age",
     type: "number",
-    required: true,
   },
   {
     label: "Image URL",
     name: "imageUrl",
     type: "text",
-    required: false,
   },
   {
     label: "Notes",
     name: "notes",
     type: "textarea",
-    required: false,
   },
 ];
 
@@ -53,71 +51,39 @@ type PetFormProps = {
   onFormSubmission: () => void;
 };
 
-const PLACE_HOLDER_IMAGE_URL = "/placeholder.svg";
-
-const setDefaultValue = (
-  actionType: "add" | "edit",
-  fieldName: keyof FormFields,
-  pet?: ClientPet | null
-) => {
-  let value = undefined;
-  if (pet && actionType === "edit") {
-    if (
-      fieldName === "imageUrl" &&
-      pet?.[fieldName] === PLACE_HOLDER_IMAGE_URL
-    ) {
-      // don't set a default value for image URL if it's the placeholder image
-      value = undefined;
-    } else {
-      value = pet?.[fieldName];
-    }
-  }
-  return value;
-};
-
 export default function PetForm({
   actionType,
   onFormSubmission,
 }: PetFormProps) {
   const { handleAddPet, selectedPet: pet, handleEditPet } = usePetContext();
-  // note: could use useFormState hook but you would need to pass it as like so action={formAction}
-  //       best for progressive-enhancement (e.g. devices that are not running JS or have JS disabled or slow)
-  // useFormState to deal with form error state; pass initial state and server action to be performed.
-  // get back errors returned from the server action; use formAction instead of addPet
-  // const initialState = {};
-  // const [error, formAction] = useFormState(addPet, initialState);
 
-  const handleAction = async (formData: FormData) => {
+  const {
+    register,
+    trigger,
+    getValues,
+    formState: { errors },
+  } = useForm<TPetForm>({
+    // zodResolver is a function that returns a resolver for react-hook-form to validate against a Zod schema
+    resolver: zodResolver(PetFormSchema),
+  });
+
+  const handleAction = async () => {
+    // trigger is a method from react-hook-form that triggers validation for all fields using specified resolver
+    const result = await trigger();
+    if (!result) {
+      return;
+    }
+
     onFormSubmission();
 
-    // Object.fromEntries() is a built-in JS method that converts a list of key-value pairs into an object
-    const formObject: FormFields = Object.fromEntries(
-      formData.entries()
-    ) as unknown as FormFields;
-
-    // Omit is a utility type that allows you to create a new type by excluding certain properties from an existing type
-    const newPet: NewPet = {
-      name: formObject.name,
-      ownerName: formObject.ownerName,
-      age: parseInt(formObject.age as unknown as string), // form data is always a string
-      notes: formObject.notes,
-      imageUrl: formObject.imageUrl || PLACE_HOLDER_IMAGE_URL,
-    };
-
-    // const newPet: Omit<Pet, "id"> = {
-    //   name: formData.get("name") as string,
-    //   ownerName: formData.get("ownerName") as string,
-    //   age: parseInt(formData.get("age") as string),
-    //   imageUrl: (formData.get("imageUrl") as string) || "/placeholder.svg",
-    //   notes: formData.get("notes") as string,
-    // };
-
+    const petData = getValues();
+    const sanitizedPet = PetFormSchema.parse(petData); // manually trigger parse which will apply transformations
     if (actionType === "add") {
-      await handleAddPet(newPet);
+      await handleAddPet(sanitizedPet);
     } else if (actionType === "edit") {
       const updatedPet: ClientPet = {
         ...pet,
-        ...newPet,
+        ...sanitizedPet,
         id: pet!.id,
       };
       await handleEditPet(updatedPet.id, updatedPet);
@@ -125,10 +91,10 @@ export default function PetForm({
   };
 
   return (
-    <form action={async (formData) => await handleAction(formData)}>
+    <form action={handleAction}>
       <div className="space-y-3">
         {fields.map((field) => {
-          const { label, name, type, required } = field;
+          const { label, name, type } = field;
           return (
             <div key={name} className="space-y-1">
               {/* htmlFor connects to id attribute */}
@@ -137,19 +103,23 @@ export default function PetForm({
               {type === "textarea" ? (
                 <Textarea
                   id={name}
-                  name={name}
                   rows={3}
-                  required={required}
-                  defaultValue={setDefaultValue(actionType, name, pet)}
+                  {...register(name, {
+                    ...field,
+                    value: pet?.[name],
+                  })}
                 />
               ) : (
                 <Input
                   id={name}
-                  name={name}
-                  type={type}
-                  required={required}
-                  defaultValue={setDefaultValue(actionType, name, pet)}
+                  {...register(name, {
+                    ...field,
+                    value: pet?.[name],
+                  })}
                 />
+              )}
+              {errors[name] && (
+                <p className="text-red-500">{errors[name]?.message}</p>
               )}
             </div>
           );

@@ -5,7 +5,7 @@ import {
   useSearchContext,
   useSelectedPetWithOptimisticCreate,
 } from "@/lib/hooks";
-import { ClientPet, NewPet } from "@/lib/types";
+import type { ClientPet, NewPet } from "@/lib/types";
 import { createContext, useOptimistic, startTransition, useMemo } from "react";
 import { toast } from "sonner";
 
@@ -130,6 +130,7 @@ export default function PetContextProvider({
         action: OptimisticPetActions.delete,
         payload: { id: tempId },
       });
+      handleChangeSelectedPetId(null);
     } else if (response?.pet?.id) {
       handleResolvedCreatedPet(response.pet, tempId);
     }

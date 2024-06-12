@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { usePetContext } from "@/lib/hooks";
-import { ClientPet } from "@/lib/types";
+import type { ClientPet } from "@/lib/types";
 import PetButton from "./pet-button";
 import { NEW_PET_TEMP_ID_PREFIX } from "@/lib/constants";
 

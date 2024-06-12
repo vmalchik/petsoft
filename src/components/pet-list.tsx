@@ -1,6 +1,6 @@
 "use client";
 import { usePetContext } from "@/lib/hooks";
-import { ClientPet } from "@/lib/types";
+import type { ClientPet } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { Button } from "./ui/button";
