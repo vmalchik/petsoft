@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PetFormSchema } from "@/lib/validations";
+import { PLACE_HOLDER_IMAGE_URL } from "@/lib/constants";
 
 type TPetForm = z.infer<typeof PetFormSchema>;
 
@@ -16,6 +17,7 @@ type Field<K extends keyof TPetForm> = {
   label: string;
   name: K; // enforce to be one one of the keys of TPetForm such as "name", "ownerName", etc.
   type: "text" | "number" | "textarea";
+  required?: boolean;
 };
 
 const fields: Field<keyof TPetForm>[] = [
@@ -23,16 +25,19 @@ const fields: Field<keyof TPetForm>[] = [
     label: "Name",
     name: "name",
     type: "text",
+    required: true,
   },
   {
     label: "Owner Name",
     name: "ownerName",
     type: "text",
+    required: true,
   },
   {
     label: "Age",
     name: "age",
     type: "number",
+    required: true,
   },
   {
     label: "Image URL",
@@ -51,6 +56,21 @@ type PetFormProps = {
   onFormSubmission: () => void;
 };
 
+const getDefaultImageURL = (url?: string) => {
+  return url === PLACE_HOLDER_IMAGE_URL ? "" : url;
+};
+
+const setDefaultFormValues = (pet: ClientPet) => {
+  console.log("pet", pet);
+  return {
+    name: pet!.name,
+    ownerName: pet!.ownerName,
+    age: pet!.age,
+    imageUrl: getDefaultImageURL(pet?.imageUrl),
+    notes: pet?.notes || "",
+  };
+};
+
 export default function PetForm({
   actionType,
   onFormSubmission,
@@ -63,8 +83,11 @@ export default function PetForm({
     getValues,
     formState: { errors },
   } = useForm<TPetForm>({
+    progressive: true, // enables passage of required attribute to input elements
     // zodResolver is a function that returns a resolver for react-hook-form to validate against a Zod schema
     resolver: zodResolver(PetFormSchema),
+    defaultValues:
+      actionType === "edit" ? setDefaultFormValues(pet!) : undefined,
   });
 
   const handleAction = async () => {
@@ -74,8 +97,7 @@ export default function PetForm({
       return;
     }
 
-    onFormSubmission();
-
+    onFormSubmission(); // notify parent component that form submission is happening
     const petData = getValues();
     const sanitizedPet = PetFormSchema.parse(petData); // manually trigger parse which will apply transformations
     if (actionType === "add") {
@@ -94,7 +116,7 @@ export default function PetForm({
     <form action={handleAction}>
       <div className="space-y-3">
         {fields.map((field) => {
-          const { label, name, type } = field;
+          const { label, name, type, required } = field;
           return (
             <div key={name} className="space-y-1">
               {/* htmlFor connects to id attribute */}
@@ -103,18 +125,20 @@ export default function PetForm({
               {type === "textarea" ? (
                 <Textarea
                   id={name}
+                  aria-required={required}
+                  aria-invalid={errors[name] ? "true" : "false"}
                   rows={3}
                   {...register(name, {
                     ...field,
-                    value: pet?.[name],
                   })}
                 />
               ) : (
                 <Input
                   id={name}
+                  aria-required={required}
+                  aria-invalid={errors[name] ? "true" : "false"}
                   {...register(name, {
                     ...field,
-                    value: pet?.[name],
                   })}
                 />
               )}
