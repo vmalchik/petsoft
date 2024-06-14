@@ -5,19 +5,19 @@ import {
   useSearchContext,
   useSelectedPetWithOptimisticCreate,
 } from "@/lib/hooks";
-import type { ClientPet, NewPet } from "@/lib/types";
+import type { ClientPet, NewPet, PetId } from "@/lib/types";
 import { createContext, useOptimistic, startTransition, useMemo } from "react";
 import { toast } from "sonner";
 
 type TPetContext = {
   pets: ClientPet[];
   numPets: number;
-  selectedPetId: ClientPet["id"] | null;
+  selectedPetId: PetId | null;
   selectedPet: ClientPet | null;
-  handleChangeSelectedPetId: (id: ClientPet["id"]) => void;
-  handleCheckoutPet: (id: ClientPet["id"]) => Promise<void>;
+  handleChangeSelectedPetId: (id: PetId) => void;
+  handleCheckoutPet: (id: PetId) => Promise<void>;
   handleAddPet: (pet: NewPet) => Promise<void>;
-  handleEditPet: (petId: ClientPet["id"], pet: ClientPet) => Promise<void>;
+  handleEditPet: (petId: PetId, pet: ClientPet) => Promise<void>;
 };
 
 type PetContextProviderProps = {
@@ -48,7 +48,7 @@ type OptimisticPetUpdate = {
 
 type OptimisticPetDelete = {
   action: OptimisticPetActions.delete;
-  payload: { id: ClientPet["id"] };
+  payload: { id: PetId };
 };
 
 type OptimisticPetsChanges =
@@ -102,7 +102,7 @@ export default function PetContextProvider({
     }
   };
 
-  const handleCheckoutPet = async (id: ClientPet["id"]) => {
+  const handleCheckoutPet = async (id: PetId) => {
     handleChangeSelectedPetId(null);
     startTransition(() => {
       setOptimisticPets({
@@ -136,7 +136,7 @@ export default function PetContextProvider({
     }
   };
 
-  const handleEditPet = async (petId: ClientPet["id"], pet: ClientPet) => {
+  const handleEditPet = async (petId: PetId, pet: ClientPet) => {
     startTransition(() => {
       const updatedPet = { ...pet, id: petId };
       setOptimisticPets({

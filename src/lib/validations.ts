@@ -1,6 +1,6 @@
 import { ZodSchema, z } from "zod";
 // import { z } from "zod";
-import { NewPet } from "./types";
+import { NewPet, PetId } from "./types";
 import { PLACE_HOLDER_IMAGE_URL } from "./constants";
 
 export const PetFormSchema = z
@@ -36,4 +36,9 @@ export const PetFormSchema = z
     // transformations only works with onSubmit. Does not work with form action.
     ...data,
     imageUrl: data.imageUrl || PLACE_HOLDER_IMAGE_URL, // after validation; if imageUrl is empty, use placeholder image
-  })) satisfies ZodSchema<NewPet>; // satisfies is a type assertion to tell TypeScript that the schema is for Schema of NewPet type
+  })) satisfies ZodSchema<NewPet>; // satisfies is a type assertion to tell TypeScript that the schema is a Zod schema of NewPet type
+
+// This helps TypeScript understand that PetIdSchema is indeed a Zod schema that validates a PetId (which is a string in your Prisma model).
+export const PetIdSchema = z
+  .string()
+  .cuid({ message: "Invalid pet ID" }) satisfies ZodSchema<PetId>;

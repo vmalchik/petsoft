@@ -1,7 +1,7 @@
 import { PetContext } from "@/contexts/pet-context-provider";
 import { SearchContext } from "@/contexts/search-context-provider";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { ClientPet } from "./types";
+import { ClientPet, PetId } from "./types";
 import { NEW_PET_TEMP_ID_PREFIX } from "./constants";
 
 export function usePetContext() {
@@ -26,9 +26,7 @@ export function useSelectedPetWithOptimisticCreate(pets: ClientPet[]) {
   // 'pendingNewPet' variable is a fix for optimistic updates causing newly added
   // to flicker in UI when selected by user before the server response
   const pendingNewPet = useRef<ClientPet | null>(null);
-  const [selectedPetId, setSelectedPetId] = useState<ClientPet["id"] | null>(
-    null
-  );
+  const [selectedPetId, setSelectedPetId] = useState<PetId | null>(null);
 
   // derived state
   const selectedPet = useMemo<ClientPet | null>(() => {
@@ -62,7 +60,7 @@ export function useSelectedPetWithOptimisticCreate(pets: ClientPet[]) {
     }
   }, [selectedPetId]);
 
-  const handleChangeSelectedPetId = (id: ClientPet["id"] | null) => {
+  const handleChangeSelectedPetId = (id: PetId | null) => {
     setSelectedPetId(id);
   };
 
@@ -70,10 +68,7 @@ export function useSelectedPetWithOptimisticCreate(pets: ClientPet[]) {
     pendingNewPet.current = pendingPet;
   };
 
-  const handleResolvedCreatedPet = (
-    newPet: ClientPet,
-    tempId: ClientPet["id"]
-  ) => {
+  const handleResolvedCreatedPet = (newPet: ClientPet, tempId: PetId) => {
     // if user hasn't selected another pet before the server response
     // smooth update ui with the new pet id from the server without flicker
     if (pendingNewPet.current?.id === tempId) {

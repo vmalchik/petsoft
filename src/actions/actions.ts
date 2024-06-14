@@ -3,8 +3,8 @@
 import "server-only";
 import prisma from "@/lib/db";
 import { revalidatePath } from "next/cache";
-import type { ClientPet } from "@/lib/types";
-import { PetFormSchema } from "@/lib/validations";
+import type { ClientPet, NewPet, PetId } from "@/lib/types";
+import { PetFormSchema, PetIdSchema } from "@/lib/validations";
 
 // server actions perform update and revalidate the layout page in a single function and single network request
 // we cannot trust input from the client so input type will initially be unknown until validation is done
@@ -12,7 +12,7 @@ export const addPet = async (pet: unknown) => {
   try {
     const validatedPet = PetFormSchema.safeParse(pet);
     if (!validatedPet.success) {
-      throw new Error("Invalid pet data");
+      throw new Error("Failed to add pet. Invalid pet data");
     }
 
     const createdPet = await prisma.pet.create({ data: validatedPet.data });
@@ -31,12 +31,29 @@ export const addPet = async (pet: unknown) => {
   }
 };
 
-export const editPet = async (petId: ClientPet["id"], pet: ClientPet) => {
+export const editPet = async (petId: unknown, pet: unknown) => {
   try {
-    const updatedPet = await prisma.pet.update({
-      where: { id: petId },
-      data: pet,
+    // could use parse() instead of safeParse() but safeParse() will return an object with a success property
+    const validatedPetId = PetIdSchema.safeParse(petId);
+    const validatedPet = PetFormSchema.safeParse(pet);
+
+    if (!validatedPetId.success) {
+      throw new Error("Failed to edit pet. Invalid pet id.");
+    }
+
+    if (!validatedPet.success) {
+      throw new Error("Failed to edit pet. Invalid pet data.");
+    }
+
+    // Prisma update not able to infer the type of the data so we need to specify the type
+    const updatedPet = await prisma.pet.update<{
+      where: { id: PetId };
+      data: NewPet;
+    }>({
+      where: { id: validatedPetId.data },
+      data: validatedPet.data,
     });
+
     revalidatePath("/app", "layout");
     return {
       pet: updatedPet,
@@ -51,10 +68,16 @@ export const editPet = async (petId: ClientPet["id"], pet: ClientPet) => {
   }
 };
 
-export const deletePet = async (petId: ClientPet["id"]) => {
+export const deletePet = async (petId: unknown) => {
   try {
+    const validatedPetId = PetIdSchema.safeParse(petId);
+
+    if (!validatedPetId.success) {
+      throw new Error("Failed to edit pet. Invalid pet id.");
+    }
+
     const deletedPet = await prisma.pet.delete({
-      where: { id: petId },
+      where: { id: validatedPetId.data },
     });
     revalidatePath("/app", "layout");
     return { pet: deletedPet };

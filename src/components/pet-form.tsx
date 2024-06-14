@@ -61,7 +61,6 @@ const getDefaultImageURL = (url?: string) => {
 };
 
 const setDefaultFormValues = (pet: ClientPet) => {
-  console.log("pet", pet);
   return {
     name: pet!.name,
     ownerName: pet!.ownerName,
