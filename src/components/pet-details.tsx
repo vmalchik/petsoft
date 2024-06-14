@@ -26,7 +26,7 @@ export default function PetDetails() {
 
 // Generally not a good idea to have layout styles part of the component but these are internal components and are not meant to be reused
 const EmptyView = () => (
-  <p className="h-full flex justify-center items-center text-2xl font-medium">
+  <p className="h-full flex justify-center items-center text-2xl opacity-25">
     No pet selected
   </p>
 );
