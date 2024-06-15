@@ -124,7 +124,6 @@ export default function PetForm({
               {type === "textarea" ? (
                 <Textarea
                   id={name}
-                  aria-required={required}
                   aria-invalid={errors[name] ? "true" : "false"}
                   rows={3}
                   {...register(name, {
@@ -134,7 +133,6 @@ export default function PetForm({
               ) : (
                 <Input
                   id={name}
-                  aria-required={required}
                   aria-invalid={errors[name] ? "true" : "false"}
                   {...register(name, {
                     ...field,

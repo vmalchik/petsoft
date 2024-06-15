@@ -7,9 +7,9 @@ type AuthLayoutProps = {
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
   return (
-    <main className="flex flex-col items-center gap-y-5 justify-center min-h-screen">
+    <div className="flex flex-col items-center gap-y-5 justify-center min-h-screen bg-white/75">
       <Logo />
       {children}
-    </main>
+    </div>
   );
 }
