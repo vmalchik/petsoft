@@ -1,8 +1,6 @@
-import { NextResponse } from "next/server";
+import { auth } from "./lib/auth";
 
-export function middleware(request: Request) {
-  return NextResponse.next();
-}
+export default auth;
 
 export const config = {
   matcher: [
