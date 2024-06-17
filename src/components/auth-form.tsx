@@ -2,6 +2,7 @@ import React from "react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import { login } from "@/actions/actions";
 
 type AuthFormProps = {
   type: "login" | "signup";
@@ -9,14 +10,19 @@ type AuthFormProps = {
 
 export default function AuthForm({ type }: AuthFormProps) {
   return (
-    <form>
+    <form action={login}>
       <div className="space-y-1">
         <Label htmlFor="email">Email</Label>
-        <Input id="email" type="email" required />
+        <Input id="email" type="email" required autoComplete="username" />
       </div>
       <div className="space-y-1 mt-2 mb-4">
         <Label htmlFor="password">Password</Label>
-        <Input id="password" type="password" required />
+        <Input
+          id="password"
+          type="password"
+          required
+          autoComplete="current-password"
+        />
       </div>
       <Button type="submit">{type === "login" ? "Log in" : "Sign up"}</Button>
     </form>

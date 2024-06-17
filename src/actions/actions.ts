@@ -3,8 +3,17 @@
 import "server-only";
 import prisma from "@/lib/db";
 import { revalidatePath } from "next/cache";
-import type { ClientPet, NewPet, PetId } from "@/lib/types";
+import type { NewPet, PetId } from "@/lib/types";
 import { PetFormSchema, PetIdSchema } from "@/lib/validations";
+import { signIn } from "@/lib/auth";
+
+// --- User actions ---
+export const login = async (formData: FormData) => {
+  const credentials = Object.fromEntries(formData.entries());
+  await signIn("credentials", credentials);
+};
+
+// --- Pet actions ---
 
 // server actions perform update and revalidate the layout page in a single function and single network request
 // we cannot trust input from the client so input type will initially be unknown until validation is done
