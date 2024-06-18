@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import type { NewPet, PetId } from "@/lib/types";
 import { PetFormSchema, PetIdSchema } from "@/lib/validations";
 import { signIn, signOut } from "@/lib/auth";
+import bcrypt from "bcryptjs";
 
 // --- User actions ---
 export const login = async (formData: FormData) => {
@@ -15,6 +16,21 @@ export const login = async (formData: FormData) => {
 
 export const logout = async () => {
   await signOut({ redirectTo: "/login" });
+};
+
+export const signup = async (formData: FormData) => {
+  // Note: adding try/catch causes signIn to not work. TODO: investigate https://github.com/vercel/next.js/issues/49298
+  const credentials = Object.fromEntries(formData.entries());
+  const hashedPassword = await bcrypt.hash(credentials.password, 10);
+  await prisma.user.create({
+    data: {
+      email: credentials.email,
+      hashedPassword: hashedPassword,
+    },
+  });
+  console.log(`New user ${credentials.email}`);
+  // sign in the user upon successful sign up
+  await signIn("credentials", formData);
 };
 
 // --- Pet actions ---

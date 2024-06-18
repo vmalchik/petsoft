@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient } from "@prisma/client";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 // OK to do here instead of in a server component via db.ts because this is a one-time operation
 const prisma = new PrismaClient();

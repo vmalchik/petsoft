@@ -47,7 +47,7 @@ const config = {
       // runs on every request with middleware
       const isLoggedIn = Boolean(auth?.user?.email); // Provided by next-auth. Value is equal to return of authorize function
       const isProtectedRoute = request.nextUrl.pathname.includes("/app");
-
+      console.log(auth);
       // explicit allow list
       if (isLoggedIn && !isProtectedRoute) {
         return Response.redirect(new URL("/app/dashboard", request.nextUrl));

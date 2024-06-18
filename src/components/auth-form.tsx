@@ -2,7 +2,7 @@ import React from "react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { login } from "@/actions/actions";
+import { login, signup } from "@/actions/actions";
 
 type AuthFormProps = {
   type: "login" | "signup";
@@ -12,7 +12,7 @@ export default function AuthForm({ type }: AuthFormProps) {
   return (
     // Redirect to desired location based on callback in URL
     // <form action={() => { await login(); Router.push(// callback URL value"); }}>
-    <form action={login}>
+    <form action={type === "login" ? login : signup}>
       <div className="space-y-1">
         <Label htmlFor="email">Email</Label>
         <Input

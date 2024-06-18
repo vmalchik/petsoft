@@ -98,13 +98,13 @@ export default function PetForm({
 
     onFormSubmission(); // notify parent component that form submission is happening
     const petData = getValues();
-    const sanitizedPet = PetFormSchema.parse(petData); // manually trigger parse which will apply transformations
+    const validatedPet = PetFormSchema.parse(petData); // manually trigger parse which will apply transformations
     if (actionType === "add") {
-      await handleAddPet(sanitizedPet);
+      await handleAddPet(validatedPet);
     } else if (actionType === "edit") {
       const updatedPet: ClientPet = {
         ...pet,
-        ...sanitizedPet,
+        ...validatedPet,
         id: pet!.id,
       };
       await handleEditPet(updatedPet.id, updatedPet);
