@@ -5,12 +5,16 @@ import prisma from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import type { NewPet, PetId } from "@/lib/types";
 import { PetFormSchema, PetIdSchema } from "@/lib/validations";
-import { signIn } from "@/lib/auth";
+import { signIn, signOut } from "@/lib/auth";
 
 // --- User actions ---
 export const login = async (formData: FormData) => {
   const credentials = Object.fromEntries(formData.entries());
   await signIn("credentials", credentials);
+};
+
+export const logout = async () => {
+  await signOut({ redirectTo: "/login" });
 };
 
 // --- Pet actions ---

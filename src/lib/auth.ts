@@ -32,7 +32,7 @@ const config = {
             return null;
           }
 
-          return user;
+          return { email: user.email, id: user.id };
         } catch (e) {
           console.log("Authorize Exception", e);
         }
@@ -45,14 +45,17 @@ const config = {
   callbacks: {
     authorized: async ({ auth, request }) => {
       // runs on every request with middleware
-      const isLoggedIn = Boolean(auth?.user); // Provided by next-auth. Value is equal to return of authorize function
+      const isLoggedIn = Boolean(auth?.user?.email); // Provided by next-auth. Value is equal to return of authorize function
       const isProtectedRoute = request.nextUrl.pathname.includes("/app");
 
+      // explicit allow list
       if (!isProtectedRoute) return true;
-      if (isProtectedRoute && !isLoggedIn) return false;
       if (isProtectedRoute && isLoggedIn) return true;
+
+      // deny access for all other cases
+      return false;
     },
   },
 } satisfies NextAuthConfig;
 
-export const { auth, signIn } = NextAuth(config);
+export const { auth, signIn, signOut } = NextAuth(config);
