@@ -10,6 +10,8 @@ type AuthFormProps = {
 
 export default function AuthForm({ type }: AuthFormProps) {
   return (
+    // Redirect to desired location based on callback in URL
+    // <form action={() => { await login(); Router.push(// callback URL value"); }}>
     <form action={login}>
       <div className="space-y-1">
         <Label htmlFor="email">Email</Label>

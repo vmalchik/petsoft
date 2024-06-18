@@ -49,8 +49,11 @@ const config = {
       const isProtectedRoute = request.nextUrl.pathname.includes("/app");
 
       // explicit allow list
+      if (isLoggedIn && !isProtectedRoute) {
+        return Response.redirect(new URL("/app/dashboard", request.nextUrl));
+      }
+      if (isLoggedIn && isProtectedRoute) return true;
       if (!isProtectedRoute) return true;
-      if (isProtectedRoute && isLoggedIn) return true;
 
       // deny access for all other cases
       return false;
