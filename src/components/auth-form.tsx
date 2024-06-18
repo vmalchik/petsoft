@@ -13,13 +13,20 @@ export default function AuthForm({ type }: AuthFormProps) {
     <form action={login}>
       <div className="space-y-1">
         <Label htmlFor="email">Email</Label>
-        <Input id="email" type="email" required autoComplete="username" />
+        <Input
+          id="email"
+          type="email"
+          name="email" // must be provided for next-auth to work
+          required
+          autoComplete="username"
+        />
       </div>
       <div className="space-y-1 mt-2 mb-4">
         <Label htmlFor="password">Password</Label>
         <Input
           id="password"
           type="password"
+          name="password" // must be provided for next-auth to work
           required
           autoComplete="current-password"
         />
