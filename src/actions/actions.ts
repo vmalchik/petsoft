@@ -77,11 +77,17 @@ export const addPet = async (pet: unknown) => {
   }
 };
 
-export const editPet = async (petId: unknown, pet: unknown) => {
+export const editPet = async (petId: unknown, newPetData: unknown) => {
   try {
+    // Only authenticated users can delete pets
+    const session = await auth();
+    if (!session?.user) {
+      redirect("/login");
+    }
+
     // could use parse() instead of safeParse() but safeParse() will return an object with a success property
     const validatedPetId = PetIdSchema.safeParse(petId);
-    const validatedPet = PetFormSchema.safeParse(pet);
+    const validatedPet = PetFormSchema.safeParse(newPetData);
 
     if (!validatedPetId.success) {
       throw new Error("Failed to edit pet. Invalid pet id.");
@@ -89,6 +95,24 @@ export const editPet = async (petId: unknown, pet: unknown) => {
 
     if (!validatedPet.success) {
       throw new Error("Failed to edit pet. Invalid pet data.");
+    }
+
+    // Must validate that user owns pet (authorization check)
+    const pet = await prisma.pet.findUnique({
+      where: {
+        id: validatedPetId.data,
+      },
+      select: {
+        userId: true, // only select userId from the response. prevents over fetching
+      },
+    });
+
+    if (!pet) {
+      throw new Error("Failed to edit pet. Pet not found.");
+    }
+
+    if (pet.userId !== session.user.id) {
+      throw new Error("Failed to edit pet. Unauthorized.");
     }
 
     // Prisma update not able to infer the type of the data so we need to specify the type
