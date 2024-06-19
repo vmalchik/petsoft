@@ -40,6 +40,7 @@ export const signup = async (formData: FormData) => {
 // we cannot trust input from the client so input type will initially be unknown until validation is done
 export const addPet = async (pet: unknown) => {
   try {
+    // Must validate that add new pet request is being made by authenticated user
     const session = await auth();
     if (!session?.user) {
       redirect("/login");
@@ -115,10 +116,34 @@ export const editPet = async (petId: unknown, pet: unknown) => {
 
 export const deletePet = async (petId: unknown) => {
   try {
+    // Only authenticated users can delete pets
+    const session = await auth();
+    if (!session?.user) {
+      redirect("/login");
+    }
+
     const validatedPetId = PetIdSchema.safeParse(petId);
 
     if (!validatedPetId.success) {
       throw new Error("Failed to edit pet. Invalid pet id.");
+    }
+
+    // Must validate that user owns pet (authorization check)
+    const pet = await prisma.pet.findUnique({
+      where: {
+        id: validatedPetId.data,
+      },
+      select: {
+        userId: true, // only select userId from the response. prevents over fetching
+      },
+    });
+
+    if (!pet) {
+      throw new Error("Failed to delete pet. Pet not found.");
+    }
+
+    if (pet.userId !== session.user.id) {
+      throw new Error("Failed to delete pet. Unauthorized.");
     }
 
     const deletedPet = await prisma.pet.delete({
