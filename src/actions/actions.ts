@@ -7,7 +7,11 @@ import type { NewPet, PetId } from "@/lib/types";
 import { PetFormSchema, PetIdSchema, AuthSchema } from "@/lib/validations";
 import { signIn, signOut } from "@/lib/auth";
 import bcrypt from "bcryptjs";
-import { checkAuth, getPetById } from "@/lib/server-utils";
+import {
+  checkAuth,
+  getPetById,
+  handleNextAuthRedirectError,
+} from "@/lib/server-utils";
 import { Prisma } from "@prisma/client";
 import { AuthError } from "next-auth";
 
@@ -24,6 +28,7 @@ export const login = async (prevState: unknown, formData: unknown) => {
     await signIn("credentials", formData);
   } catch (error) {
     console.error(`Failed to sign in: ${error}`);
+    handleNextAuthRedirectError(error);
     if (error instanceof AuthError) {
       switch (error.type) {
         case "CredentialsSignin": {
@@ -37,14 +42,6 @@ export const login = async (prevState: unknown, formData: unknown) => {
           };
         }
       }
-    } else if (error instanceof Error && error.message === "NEXT_REDIRECT") {
-      // signIn will attempt to redirect upon successful sign in.
-      // next-auth redirect works by throwing an error which will be caught by our try/catch
-      // catching the error will prevent redirect so we need to re-throw the error
-      console.error(
-        `Sign In was successful. Redirect caught. Re-throwing redirect error.`
-      );
-      throw error;
     }
     return {
       message: "Could not sign in",
@@ -53,12 +50,20 @@ export const login = async (prevState: unknown, formData: unknown) => {
 };
 
 export const logout = async () => {
-  await signOut({ redirectTo: "/login" });
+  try {
+    await signOut({ redirectTo: "/login" });
+  } catch (error) {
+    console.error(`Failed to sign out: ${error}`);
+    handleNextAuthRedirectError(error);
+  }
+  // Something went wrong if user was not redirected
+  return {
+    message: "Failed to sign out",
+  };
 };
 
 // prevState is not used but is required to satisfy usage of useFormState in auth-form.tsx
 export const signup = async (prevState: unknown, formData: unknown) => {
-  // Note: adding try/catch causes signIn to not work. TODO: investigate https://github.com/vercel/next.js/issues/49298
   // Must check request data is of valid type (FormData)
   if (formData instanceof FormData === false) {
     return {

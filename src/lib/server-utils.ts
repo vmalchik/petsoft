@@ -42,3 +42,15 @@ export async function getUserByEmail(email: string) {
   });
   return user;
 }
+
+export function handleNextAuthRedirectError(error: unknown) {
+  if (error instanceof Error && error.message === "NEXT_REDIRECT") {
+    // logout will attempt to redirect upon action (e.g. sign out | sign in)
+    // next-auth redirect works by throwing an error which will be caught by our try/catch
+    // catching the error will prevent redirect so we need to re-throw the error
+    console.error(
+      `NextAuth action was successful. Redirect error caught. Re-throwing redirect error.`
+    );
+    throw error;
+  }
+}
