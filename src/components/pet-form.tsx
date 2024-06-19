@@ -106,6 +106,7 @@ export default function PetForm({
       const updatedPet: ClientPet = {
         ...pet,
         ...validatedPet,
+        userId: pet!.userId,
         id: pet!.id,
       };
       await handleEditPet(updatedPet.id, updatedPet);
