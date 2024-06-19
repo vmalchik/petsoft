@@ -1,6 +1,7 @@
 ## Architecture
 
 <image src="docs/component-snapshot-1.png" width="800px" height="auto"/>
+<image src="docs/payment.png" width="800px" height="auto"/>
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
