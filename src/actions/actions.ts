@@ -5,9 +5,9 @@ import prisma from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import type { NewPet, PetId } from "@/lib/types";
 import { PetFormSchema, PetIdSchema } from "@/lib/validations";
-import { auth, signIn, signOut } from "@/lib/auth";
+import { signIn, signOut } from "@/lib/auth";
 import bcrypt from "bcryptjs";
-import { redirect } from "next/navigation";
+import { checkAuth } from "@/lib/server-utils";
 
 // --- User actions ---
 export const login = async (formData: FormData) => {
@@ -41,10 +41,7 @@ export const signup = async (formData: FormData) => {
 export const addPet = async (pet: unknown) => {
   try {
     // Must validate that add new pet request is being made by authenticated user
-    const session = await auth();
-    if (!session?.user) {
-      redirect("/login");
-    }
+    const session = await checkAuth();
     const validatedPet = PetFormSchema.safeParse(pet);
     if (!validatedPet.success) {
       throw new Error("Failed to add pet. Invalid pet data");
@@ -80,10 +77,7 @@ export const addPet = async (pet: unknown) => {
 export const editPet = async (petId: unknown, newPetData: unknown) => {
   try {
     // Only authenticated users can delete pets
-    const session = await auth();
-    if (!session?.user) {
-      redirect("/login");
-    }
+    const session = await checkAuth();
 
     // could use parse() instead of safeParse() but safeParse() will return an object with a success property
     const validatedPetId = PetIdSchema.safeParse(petId);
@@ -141,10 +135,7 @@ export const editPet = async (petId: unknown, newPetData: unknown) => {
 export const deletePet = async (petId: unknown) => {
   try {
     // Only authenticated users can delete pets
-    const session = await auth();
-    if (!session?.user) {
-      redirect("/login");
-    }
+    const session = await checkAuth();
 
     const validatedPetId = PetIdSchema.safeParse(petId);
 

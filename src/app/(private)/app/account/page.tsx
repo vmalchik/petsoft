@@ -1,16 +1,12 @@
 import SignOutBtn from "@/components/sign-out-btn";
 import ContentBlock from "@/components/content-block";
 import H1 from "@/components/h1";
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
+import { checkAuth } from "@/lib/server-utils";
 
 export default async function AccountPage() {
   // On server components use "auth" function. On client components use "useSession" hook.
-  const session = await auth();
   // Best to add this as middleware might not always execute for server components to prevent unauthorized access
-  if (!session?.user) {
-    redirect("/login");
-  }
+  const session = await checkAuth();
 
   // Optional way to sign out using the signOut function from auth.ts
   // async function logOut() {

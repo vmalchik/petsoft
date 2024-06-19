@@ -10,18 +10,14 @@ import { Toaster } from "@/components/ui/sonner";
 import PetContextProvider from "@/contexts/pet-context-provider";
 import SearchContextProvider from "@/contexts/search-context-provider";
 import prisma from "@/lib/db";
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
+import { checkAuth } from "@/lib/server-utils";
 
 type PrivateLayoutProps = {
   readonly children: React.ReactNode;
 };
 
 export default async function PrivateLayout({ children }: PrivateLayoutProps) {
-  const session = await auth();
-  if (!session?.user) {
-    redirect("/login");
-  }
+  const session = await checkAuth();
 
   const pets = await prisma.pet.findMany({
     where: {
