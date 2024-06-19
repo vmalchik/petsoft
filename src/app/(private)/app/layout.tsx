@@ -9,8 +9,7 @@ import Header from "@/components/header";
 import { Toaster } from "@/components/ui/sonner";
 import PetContextProvider from "@/contexts/pet-context-provider";
 import SearchContextProvider from "@/contexts/search-context-provider";
-import prisma from "@/lib/db";
-import { checkAuth } from "@/lib/server-utils";
+import { checkAuth, getAllPetsByUserId } from "@/lib/server-utils";
 
 type PrivateLayoutProps = {
   readonly children: React.ReactNode;
@@ -18,19 +17,8 @@ type PrivateLayoutProps = {
 
 export default async function PrivateLayout({ children }: PrivateLayoutProps) {
   const session = await checkAuth();
+  const pets = await getAllPetsByUserId(session.user.id);
 
-  const pets = await prisma.pet.findMany({
-    where: {
-      userId: session.user.id,
-    },
-  }); // could specify filter like so: { where: { id: 1 } }
-  // const response = await fetch(
-  //   "https://www.bytegrad.com/course-assets/projects/petsoft/api/pets"
-  // );
-  // if (!response.ok) {
-  //   throw new Error("Failed to fetch pets");
-  // }
-  // const data = await response.json();
   return (
     <>
       <BackgroundPattern />

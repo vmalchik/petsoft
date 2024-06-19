@@ -7,7 +7,7 @@ import type { NewPet, PetId } from "@/lib/types";
 import { PetFormSchema, PetIdSchema } from "@/lib/validations";
 import { signIn, signOut } from "@/lib/auth";
 import bcrypt from "bcryptjs";
-import { checkAuth } from "@/lib/server-utils";
+import { checkAuth, getPetById } from "@/lib/server-utils";
 
 // --- User actions ---
 export const login = async (formData: FormData) => {
@@ -92,14 +92,7 @@ export const editPet = async (petId: unknown, newPetData: unknown) => {
     }
 
     // Must validate that user owns pet (authorization check)
-    const pet = await prisma.pet.findUnique({
-      where: {
-        id: validatedPetId.data,
-      },
-      select: {
-        userId: true, // only select userId from the response. prevents over fetching
-      },
-    });
+    const pet = await getPetById(validatedPetId.data);
 
     if (!pet) {
       throw new Error("Failed to edit pet. Pet not found.");
@@ -144,14 +137,7 @@ export const deletePet = async (petId: unknown) => {
     }
 
     // Must validate that user owns pet (authorization check)
-    const pet = await prisma.pet.findUnique({
-      where: {
-        id: validatedPetId.data,
-      },
-      select: {
-        userId: true, // only select userId from the response. prevents over fetching
-      },
-    });
+    const pet = await getPetById(validatedPetId.data);
 
     if (!pet) {
       throw new Error("Failed to delete pet. Pet not found.");
