@@ -18,7 +18,7 @@ npx prisma init --datasource-provider sqlite
 npx prisma db push
 ```
 
-### Production: Migrate database (safe updates)
+### Production: Migrate database (safe updates for production to retain all database changes)
 
 ```sh
 npx prisma db migrate

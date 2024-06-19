@@ -22,7 +22,7 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
   if (!session?.user) {
     redirect("/login");
   }
-  console.log(session.user.id);
+
   const pets = await prisma.pet.findMany({
     where: {
       userId: session.user.id,

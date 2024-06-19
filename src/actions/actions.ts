@@ -5,8 +5,9 @@ import prisma from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import type { NewPet, PetId } from "@/lib/types";
 import { PetFormSchema, PetIdSchema } from "@/lib/validations";
-import { signIn, signOut } from "@/lib/auth";
+import { auth, signIn, signOut } from "@/lib/auth";
 import bcrypt from "bcryptjs";
+import { redirect } from "next/navigation";
 
 // --- User actions ---
 export const login = async (formData: FormData) => {
@@ -39,12 +40,27 @@ export const signup = async (formData: FormData) => {
 // we cannot trust input from the client so input type will initially be unknown until validation is done
 export const addPet = async (pet: unknown) => {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      redirect("/login");
+    }
     const validatedPet = PetFormSchema.safeParse(pet);
     if (!validatedPet.success) {
       throw new Error("Failed to add pet. Invalid pet data");
     }
 
-    const createdPet = await prisma.pet.create({ data: validatedPet.data });
+    const createdPet = await prisma.pet.create({
+      data: {
+        ...validatedPet.data,
+        // alternatively could use userId
+        // userId: session.user.id,
+        user: {
+          connect: {
+            id: session.user.id,
+          },
+        },
+      },
+    });
     // revalidate the layout page because that is where we do the fetching for app/dashboard which
     // since we do the fetch in layout we need to specify app as route and layout as location
     revalidatePath("/app", "layout");
