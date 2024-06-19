@@ -10,13 +10,24 @@ import { Toaster } from "@/components/ui/sonner";
 import PetContextProvider from "@/contexts/pet-context-provider";
 import SearchContextProvider from "@/contexts/search-context-provider";
 import prisma from "@/lib/db";
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 type PrivateLayoutProps = {
   readonly children: React.ReactNode;
 };
 
 export default async function PrivateLayout({ children }: PrivateLayoutProps) {
-  const pets = await prisma.pet.findMany(); // could specify filter like so: { where: { id: 1 } }
+  const session = await auth();
+  if (!session?.user) {
+    redirect("/login");
+  }
+  console.log(session.user.id);
+  const pets = await prisma.pet.findMany({
+    where: {
+      userId: session.user.id,
+    },
+  }); // could specify filter like so: { where: { id: 1 } }
   // const response = await fetch(
   //   "https://www.bytegrad.com/course-assets/projects/petsoft/api/pets"
   // );

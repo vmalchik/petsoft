@@ -32,7 +32,7 @@ const config = {
             return null;
           }
 
-          return { email: user.email, id: user.id };
+          return user; // NextAuth will filter out certain user properties such as password
         } catch (e) {
           console.log("Authorize Exception", e);
         }
@@ -57,6 +57,22 @@ const config = {
 
       // deny access for all other cases
       return false;
+    },
+    jwt: ({ token, user }) => {
+      if (user) {
+        // user is signed in
+        // inject userId into token
+        token.userId = user.id;
+      }
+      return token;
+    },
+    session: ({ session, token }) => {
+      // inject userId into session to make it available to the client
+      // must create next-auth-d.ts and update JWT interface to include userId
+      if (session.user) {
+        session.user.id = token.userId;
+      }
+      return session;
     },
   },
 } satisfies NextAuthConfig;
