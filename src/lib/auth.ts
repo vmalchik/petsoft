@@ -2,6 +2,7 @@ import NextAuth, { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { getUserByEmail } from "./server-utils";
+import { AuthSchema } from "./validations";
 
 const config = {
   pages: {
@@ -16,14 +17,20 @@ const config = {
     // NextAuth will encrypt the token
     Credentials({
       async authorize(credentials) {
+        // runs on every login attempt
         try {
-          // runs on every login attempt
-          const { email, password } = credentials;
-          const user = getUserByEmail(email);
+          // Validate
+          const parsedFormData = AuthSchema.safeParse(credentials);
+          if (!parsedFormData.success) {
+            return null;
+          }
+          const { email, password } = parsedFormData.data;
+          const user = await getUserByEmail(email);
           if (!user) {
             console.log("User not found");
             return null;
           }
+
           const matched = await bcrypt.compare(password, user.hashedPassword);
           if (!matched) {
             console.log("Invalid credentials");
@@ -45,7 +52,7 @@ const config = {
       // runs on every request with middleware
       const isLoggedIn = Boolean(auth?.user?.email); // Provided by next-auth. Value is equal to return of authorize function
       const isProtectedRoute = request.nextUrl.pathname.includes("/app");
-      console.log(auth);
+
       // explicit allow list
       if (isLoggedIn && !isProtectedRoute) {
         return Response.redirect(new URL("/app/dashboard", request.nextUrl));

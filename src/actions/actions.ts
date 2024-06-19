@@ -4,34 +4,52 @@ import "server-only";
 import prisma from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import type { NewPet, PetId } from "@/lib/types";
-import { PetFormSchema, PetIdSchema } from "@/lib/validations";
+import { PetFormSchema, PetIdSchema, AuthSchema } from "@/lib/validations";
 import { signIn, signOut } from "@/lib/auth";
 import bcrypt from "bcryptjs";
 import { checkAuth, getPetById } from "@/lib/server-utils";
 
 // --- User actions ---
-export const login = async (formData: FormData) => {
-  const credentials = Object.fromEntries(formData.entries());
-  await signIn("credentials", credentials);
+export const login = async (formData: unknown) => {
+  // Must check request data is of valid type (FormData)
+  if (formData instanceof FormData === false) {
+    return {
+      message: "Invalid form data",
+    };
+  }
+  await signIn("credentials", formData);
 };
 
 export const logout = async () => {
   await signOut({ redirectTo: "/login" });
 };
 
-export const signup = async (formData: FormData) => {
+export const signup = async (formData: unknown) => {
   // Note: adding try/catch causes signIn to not work. TODO: investigate https://github.com/vercel/next.js/issues/49298
+  // Must check request data is of valid type (FormData)
+  if (formData instanceof FormData === false) {
+    return {
+      message: "Invalid form data",
+    };
+  }
   const credentials = Object.fromEntries(formData.entries());
-  const hashedPassword = await bcrypt.hash(credentials.password, 10);
+  const parsedFormData = AuthSchema.safeParse(credentials);
+  if (!parsedFormData.success) {
+    return {
+      message: "Invalid form data",
+    };
+  }
+  const { email, password } = parsedFormData.data;
+  const hashedPassword = await bcrypt.hash(password, 10);
   await prisma.user.create({
     data: {
-      email: credentials.email,
+      email,
       hashedPassword: hashedPassword,
     },
   });
   console.log(`New user ${credentials.email}`);
   // sign in the user upon successful sign up
-  await signIn("credentials", formData);
+  await signIn("credentials", parsedFormData.data);
 };
 
 // --- Pet actions ---

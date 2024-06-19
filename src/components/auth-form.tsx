@@ -12,6 +12,7 @@ export default function AuthForm({ type }: AuthFormProps) {
   return (
     // Redirect to desired location based on callback in URL
     // <form action={() => { await login(); Router.push(// callback URL value"); }}>
+    // progressive enhancement enabled for this form
     <form action={type === "login" ? login : signup}>
       <div className="space-y-1">
         <Label htmlFor="email">Email</Label>

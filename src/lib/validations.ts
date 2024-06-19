@@ -1,5 +1,4 @@
 import { ZodSchema, z } from "zod";
-// import { z } from "zod";
 import { NewPet, PetId } from "./types";
 import { PLACE_HOLDER_IMAGE_URL } from "./constants";
 
@@ -42,3 +41,8 @@ export const PetFormSchema = z
 export const PetIdSchema = z
   .string()
   .cuid({ message: "Invalid pet ID" }) satisfies ZodSchema<PetId>;
+
+export const AuthSchema = z.object({
+  email: z.string().email().max(100),
+  password: z.string().max(100),
+});

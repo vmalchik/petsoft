@@ -20,6 +20,7 @@ type Field<K extends keyof TPetForm> = {
   required?: boolean;
 };
 
+// TODO: consider refactoring because this creates two sets of validation: zod and HTML5 which is not ideal as you want to have a single source of truth
 const fields: Field<keyof TPetForm>[] = [
   {
     label: "Name",
