@@ -8,23 +8,56 @@ import { PetFormSchema, PetIdSchema, AuthSchema } from "@/lib/validations";
 import { signIn, signOut } from "@/lib/auth";
 import bcrypt from "bcryptjs";
 import { checkAuth, getPetById } from "@/lib/server-utils";
+import { Prisma } from "@prisma/client";
+import { AuthError } from "next-auth";
 
 // --- User actions ---
-export const login = async (formData: unknown) => {
+// prevState is not used but is required to satisfy usage of useFormState in auth-form.tsx
+export const login = async (prevState: unknown, formData: unknown) => {
   // Must check request data is of valid type (FormData)
   if (formData instanceof FormData === false) {
     return {
       message: "Invalid form data",
     };
   }
-  await signIn("credentials", formData);
+  try {
+    await signIn("credentials", formData);
+  } catch (error) {
+    console.error(`Failed to sign in: ${error}`);
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case "CredentialsSignin": {
+          return {
+            message: "Invalid credentials",
+          };
+        }
+        default: {
+          return {
+            message: "Error. Could not sign in.",
+          };
+        }
+      }
+    } else if (error instanceof Error && error.message === "NEXT_REDIRECT") {
+      // signIn will attempt to redirect upon successful sign in.
+      // next-auth redirect works by throwing an error which will be caught by our try/catch
+      // catching the error will prevent redirect so we need to re-throw the error
+      console.error(
+        `Sign In was successful. Redirect caught. Re-throwing redirect error.`
+      );
+      throw error;
+    }
+    return {
+      message: "Could not sign in",
+    };
+  }
 };
 
 export const logout = async () => {
   await signOut({ redirectTo: "/login" });
 };
 
-export const signup = async (formData: unknown) => {
+// prevState is not used but is required to satisfy usage of useFormState in auth-form.tsx
+export const signup = async (prevState: unknown, formData: unknown) => {
   // Note: adding try/catch causes signIn to not work. TODO: investigate https://github.com/vercel/next.js/issues/49298
   // Must check request data is of valid type (FormData)
   if (formData instanceof FormData === false) {
@@ -41,12 +74,27 @@ export const signup = async (formData: unknown) => {
   }
   const { email, password } = parsedFormData.data;
   const hashedPassword = await bcrypt.hash(password, 10);
-  await prisma.user.create({
-    data: {
-      email,
-      hashedPassword: hashedPassword,
-    },
-  });
+  try {
+    await prisma.user.create({
+      data: {
+        email,
+        hashedPassword,
+      },
+    });
+  } catch (error) {
+    console.error(`Failed to create user: ${error}`);
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2002") {
+        return {
+          message: "Email already exists",
+        };
+      }
+    }
+    return {
+      message: "Failed to create user",
+    };
+  }
+
   console.log(`New user ${credentials.email}`);
   // sign in the user upon successful sign up
   await signIn("credentials", parsedFormData.data);
@@ -84,6 +132,7 @@ export const addPet = async (pet: unknown) => {
   } catch (error) {
     console.error(`Failed to add pet: ${error}`);
     // server to return an object with a message property
+    // TODO: Victor refactor error.message
     return {
       error: {
         message: "Failed to add pet",
@@ -135,6 +184,7 @@ export const editPet = async (petId: unknown, newPetData: unknown) => {
     };
   } catch (error) {
     console.error(`Failed to edit pet: ${error}`);
+    // TODO: Victor refactor error.message
     return {
       error: {
         message: "Failed to edit pet",
@@ -172,6 +222,7 @@ export const deletePet = async (petId: unknown) => {
     return { pet: deletedPet };
   } catch (error) {
     console.error(`Failed to delete pet: ${error}`);
+    // TODO: Victor refactor error.message
     return {
       error: {
         message: "Failed to checkout pet",

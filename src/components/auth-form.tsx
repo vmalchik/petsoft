@@ -1,19 +1,29 @@
+"use client";
+
 import React from "react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
-import { Button } from "./ui/button";
 import { login, signup } from "@/actions/actions";
+import AuthFormBtn from "./auth-form-btn";
+import { useFormState } from "react-dom";
 
 type AuthFormProps = {
   type: "login" | "signup";
 };
 
 export default function AuthForm({ type }: AuthFormProps) {
+  // type === "login" ? login : signup
+  // Note: this is a different hook from useFormStatus in auth-form-btn.tsx
+  //       main reason to use this hook is to preserve progressive enhancement including with error state
+  const [signUpError, dispatchSignUpAction] = useFormState(signup, undefined);
+  const [loginError, dispatchLoginAction] = useFormState(login, undefined);
   return (
-    // Redirect to desired location based on callback in URL
+    // Redirect to desired location based on callback in URL. Note: doing () => fn() would lose progressive enhancement
     // <form action={() => { await login(); Router.push(// callback URL value"); }}>
     // progressive enhancement enabled for this form
-    <form action={type === "login" ? login : signup}>
+    <form
+      action={type === "login" ? dispatchLoginAction : dispatchSignUpAction}
+    >
       <div className="space-y-1">
         <Label htmlFor="email">Email</Label>
         <Input
@@ -34,7 +44,17 @@ export default function AuthForm({ type }: AuthFormProps) {
           autoComplete="current-password"
         />
       </div>
-      <Button type="submit">{type === "login" ? "Log in" : "Sign up"}</Button>
+      <AuthFormBtn type={type} />
+      {signUpError && <ErrorMessage message={signUpError.message} />}
+      {loginError && <ErrorMessage message={loginError.message} />}
     </form>
   );
 }
+
+type ErrorMessageProps = {
+  message: string;
+};
+
+const ErrorMessage = ({ message }: ErrorMessageProps) => (
+  <p className="text-red-500 text-sm mt-2">{message}</p>
+);

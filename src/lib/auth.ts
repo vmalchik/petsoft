@@ -21,6 +21,7 @@ const config = {
         try {
           // Validate
           const parsedFormData = AuthSchema.safeParse(credentials);
+
           if (!parsedFormData.success) {
             return null;
           }
