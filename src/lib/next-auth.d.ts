@@ -4,6 +4,7 @@ declare module "next-auth" {
   // Inject custom properties into User object
   interface User {
     hasAccess: boolean;
+    email: string;
   }
 
   // Assert user will exist in session
@@ -16,6 +17,7 @@ declare module "next-auth" {
 declare module "@auth/core/jwt" {
   export interface JWT {
     userId: string;
+    email: string;
     hasAccess: boolean;
   }
 }

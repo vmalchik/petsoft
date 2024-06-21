@@ -59,9 +59,12 @@ const config = {
       const isSignupRoute = request.nextUrl.pathname.includes("/signup");
 
       if (isLoggedIn && !isProtectedAppRoute) {
-        // Redirect to payment page when user is logged without access privileges and navigating to login or signup
         if ((isLoginRoute || isSignupRoute) && !hasAccess) {
+          // Redirect to payment page when user is logged without access privileges and navigating to login or signup
           return Response.redirect(new URL("/payment", request.nextUrl));
+        } else if (isLoginRoute || (isSignupRoute && hasAccess)) {
+          // Redirect to dashboard page when user is logged with access privileges and navigating to login or signup
+          return Response.redirect(new URL("/app/dashboard", request.nextUrl));
         }
         // Allow user to visit other unprotected routes when logged in
         return true;
@@ -77,16 +80,26 @@ const config = {
 
       // Allow access to unprotected routes when user is not logged in
       if (!isLoggedIn && !isProtectedAppRoute) return true;
-
+      console.log("Deny access");
       // Deny access for all other cases. By default next-auth will redirect to page specified by signIn property
       return false;
     },
-    jwt: ({ token, user }) => {
+    jwt: async ({ token, user, trigger }) => {
       if (user) {
         // inject custom properties into token
         token.userId = user.id;
+        token.email = user.email!;
         token.hasAccess = user.hasAccess;
       }
+
+      if (trigger === "update") {
+        // obtain latest user data from database
+        const dbUser = await getUserByEmail(token.email);
+        if (dbUser) {
+          token.hasAccess = dbUser.hasAccess;
+        }
+      }
+
       return token;
     },
     session: ({ session, token }) => {

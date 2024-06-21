@@ -47,6 +47,14 @@ Follow NextJS documentation best practice on how to use Prisma client in NextJS 
 
 **Ref**: [NextJS Docs](https://www.prisma.io/docs/orm/more/help-and-troubleshooting/help-articles/nextjs-prisma-client-dev-practices)
 
+## Stripe
+
+Application uses [Stripe](https://stripe.com/) to process payments. Full application access is only available to users that have purchased a valid plan.
+
+### Ngrok
+
+[Ngrok](https://ngrok.com/) is used to tunnel localhost to a temporary URL. This can be used to test Stripe purchases in development mode to attain parity with production payments using Stripe.
+
 ## Getting Started
 
 First, run the development server:
