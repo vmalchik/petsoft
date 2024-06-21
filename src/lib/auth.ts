@@ -47,46 +47,54 @@ const config = {
       },
     }),
   ],
-  // Callbacks are used to handle response to user actions (e.g. login)
   callbacks: {
     authorized: async ({ auth, request }) => {
       // runs on every request with middleware
       const isLoggedIn = Boolean(auth?.user?.email); // Provided by next-auth. Value is equal to return of authorize function
+      const hasAccess = Boolean(auth?.user?.hasAccess); // Custom property added to user object with valid payment plan
+
       // Requested Route
       const isProtectedAppRoute = request.nextUrl.pathname.includes("/app");
       const isLoginRoute = request.nextUrl.pathname.includes("/login");
       const isSignupRoute = request.nextUrl.pathname.includes("/signup");
 
       if (isLoggedIn && !isProtectedAppRoute) {
-        // explicit redirect to payments page when user is logged in and navigating to login or signup
-        if (isLoginRoute || isSignupRoute) {
+        // Redirect to payment page when user is logged without access privileges and navigating to login or signup
+        if ((isLoginRoute || isSignupRoute) && !hasAccess) {
           return Response.redirect(new URL("/payment", request.nextUrl));
         }
-        // allow user to visit other unprotected routes when logged in
+        // Allow user to visit other unprotected routes when logged in
         return true;
       }
-      // explicit allow access to protected routes when user is logged in and navigating to a protected route
-      if (isLoggedIn && isProtectedAppRoute) return true;
 
-      // explicit allow access to unprotected routes when user is not logged in
+      // Redirect to payment page when user is logged in but has no access privileges
+      if (isLoggedIn && isProtectedAppRoute && !hasAccess) {
+        return Response.redirect(new URL("/payment", request.nextUrl));
+      }
+
+      // Allow access to protected routes when user is logged with access privileges and navigating to a protected route
+      if (isLoggedIn && isProtectedAppRoute && hasAccess) return true;
+
+      // Allow access to unprotected routes when user is not logged in
       if (!isLoggedIn && !isProtectedAppRoute) return true;
 
-      // deny access for all other cases
+      // Deny access for all other cases. By default next-auth will redirect to page specified by signIn property
       return false;
     },
     jwt: ({ token, user }) => {
       if (user) {
-        // user is signed in
-        // inject userId into token
+        // inject custom properties into token
         token.userId = user.id;
+        token.hasAccess = user.hasAccess;
       }
       return token;
     },
     session: ({ session, token }) => {
-      // inject userId into session to make it available to the client
+      // inject custom properties into session to make it available to the client
       // must create next-auth-d.ts and update JWT interface to include userId
       if (session.user) {
         session.user.id = token.userId;
+        session.user.hasAccess = token.hasAccess;
       }
       return session;
     },

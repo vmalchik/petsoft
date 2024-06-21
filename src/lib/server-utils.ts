@@ -8,6 +8,7 @@ import prisma from "./db";
 export async function checkAuth() {
   const session = await auth();
   if (!session?.user) {
+    console.error("No valid session. Redirecting to /login");
     redirect("/login");
   }
   return session;

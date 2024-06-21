@@ -1,15 +1,21 @@
 import { User } from "next-auth";
 
-// Inject user id into session
 declare module "next-auth" {
+  // Inject custom properties into User object
+  interface User {
+    hasAccess: boolean;
+  }
+
+  // Assert user will exist in session
   interface Session {
     user: User;
   }
 }
 
-// Inject userId into JWT token
+// Inject custom properties into JWT token
 declare module "@auth/core/jwt" {
   export interface JWT {
     userId: string;
+    hasAccess: boolean;
   }
 }
