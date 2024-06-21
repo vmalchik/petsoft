@@ -52,14 +52,24 @@ const config = {
     authorized: async ({ auth, request }) => {
       // runs on every request with middleware
       const isLoggedIn = Boolean(auth?.user?.email); // Provided by next-auth. Value is equal to return of authorize function
-      const isProtectedRoute = request.nextUrl.pathname.includes("/app");
+      // Requested Route
+      const isProtectedAppRoute = request.nextUrl.pathname.includes("/app");
+      const isLoginRoute = request.nextUrl.pathname.includes("/login");
+      const isSignupRoute = request.nextUrl.pathname.includes("/signup");
 
-      // explicit allow list
-      if (isLoggedIn && !isProtectedRoute) {
-        return Response.redirect(new URL("/app/dashboard", request.nextUrl));
+      if (isLoggedIn && !isProtectedAppRoute) {
+        // explicit redirect to payments page when user is logged in and navigating to login or signup
+        if (isLoginRoute || isSignupRoute) {
+          return Response.redirect(new URL("/payment", request.nextUrl));
+        }
+        // allow user to visit other unprotected routes when logged in
+        return true;
       }
-      if (isLoggedIn && isProtectedRoute) return true;
-      if (!isProtectedRoute) return true;
+      // explicit allow access to protected routes when user is logged in and navigating to a protected route
+      if (isLoggedIn && isProtectedAppRoute) return true;
+
+      // explicit allow access to unprotected routes when user is not logged in
+      if (!isLoggedIn && !isProtectedAppRoute) return true;
 
       // deny access for all other cases
       return false;
