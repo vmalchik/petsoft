@@ -17,28 +17,26 @@ type Field<K extends keyof TPetForm> = {
   label: string;
   name: K; // enforce to be one one of the keys of TPetForm such as "name", "ownerName", etc.
   type: "text" | "number" | "textarea";
-  required?: boolean;
 };
 
-// TODO: consider refactoring because this creates two sets of validation: zod and HTML5 which is not ideal as you want to have a single source of truth
 const fields: Field<keyof TPetForm>[] = [
   {
     label: "Name",
     name: "name",
     type: "text",
-    required: true,
+    // creates two sets of validation: zod and HTML5 which is not ideal as you want to have a single source of truth for validation
+    // additionally, this makes usage of useForm "register" function clunky if you spread fields { ...fields } as it needs "required" attribute
+    // required: true
   },
   {
     label: "Owner Name",
     name: "ownerName",
     type: "text",
-    required: true,
   },
   {
     label: "Age",
     name: "age",
     type: "number",
-    required: true,
   },
   {
     label: "Image URL",
@@ -106,7 +104,6 @@ export default function PetForm({
       const updatedPet: ClientPet = {
         ...pet,
         ...validatedPet,
-        userId: pet!.userId,
         id: pet!.id,
       };
       await handleEditPet(updatedPet.id, updatedPet);
@@ -117,7 +114,7 @@ export default function PetForm({
     <form action={handleAction}>
       <div className="space-y-3">
         {fields.map((field) => {
-          const { label, name, type, required } = field;
+          const { label, name, type } = field;
           return (
             <div key={name} className="space-y-1">
               {/* htmlFor connects to id attribute */}
@@ -128,17 +125,13 @@ export default function PetForm({
                   id={name}
                   aria-invalid={errors[name] ? "true" : "false"}
                   rows={3}
-                  {...register(name, {
-                    ...field,
-                  })}
+                  {...register(name)}
                 />
               ) : (
                 <Input
                   id={name}
                   aria-invalid={errors[name] ? "true" : "false"}
-                  {...register(name, {
-                    ...field,
-                  })}
+                  {...register(name)}
                 />
               )}
               {errors[name] && (

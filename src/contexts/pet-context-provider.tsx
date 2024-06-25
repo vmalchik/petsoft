@@ -96,10 +96,8 @@ export default function PetContextProvider({
     });
   }, [searchQuery, optimisticPets]);
 
-  const handleError = (error: any) => {
-    if (error?.message) {
-      toast.warning(error.message);
-    }
+  const handleError = (message: string) => {
+    toast.warning(message);
   };
 
   const handleCheckoutPet = async (id: PetId) => {
@@ -111,7 +109,9 @@ export default function PetContextProvider({
       });
     });
     const response = await deletePet(id);
-    response.error && handleError(response.error);
+    if (response.error) {
+      handleError(response.error?.message || "Failed to checkout pet");
+    }
   };
 
   const handleAddPet = async (pet: NewPet) => {
@@ -124,15 +124,15 @@ export default function PetContextProvider({
     });
 
     const response = await addPet(pet);
-    if (response.error) {
-      handleError(response.error);
+    if (response.pet) {
+      handleResolvedCreatedPet(response.pet, tempId);
+    } else {
+      handleError(response.error?.message || "Failed to add pet");
       setOptimisticPets({
         action: OptimisticPetActions.delete,
         payload: { id: tempId },
       });
       handleChangeSelectedPetId(null);
-    } else if (response?.pet?.id) {
-      handleResolvedCreatedPet(response.pet, tempId);
     }
   };
 
@@ -145,7 +145,9 @@ export default function PetContextProvider({
       });
     });
     const response = await editPet(petId, pet);
-    response.error && handleError(response.error);
+    if (response.error) {
+      handleError(response.error?.message || "Failed to edit pet");
+    }
   };
 
   return (

@@ -6,7 +6,7 @@ import { AuthSchema } from "./validations";
 
 // Pet
 export type NewPet = Omit<Pet, "id" | "createdAt" | "updatedAt" | "userId">;
-export type ClientPet = Omit<Pet, "createdAt" | "updatedAt">;
+export type ClientPet = Omit<Pet, "createdAt" | "updatedAt" | "userId">;
 export type PetId = Pet["id"];
 
 // User

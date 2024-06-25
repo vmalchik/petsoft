@@ -3,7 +3,7 @@
 import "server-only";
 import prisma from "@/lib/db";
 import { revalidatePath } from "next/cache";
-import type { NewPet, PetId } from "@/lib/types";
+import type { ClientPet, NewPet, PetId } from "@/lib/types";
 import { PetFormSchema, PetIdSchema, AuthSchema } from "@/lib/validations";
 import { signIn, signOut } from "@/lib/auth";
 import bcrypt from "bcryptjs";
@@ -16,6 +16,18 @@ import { Prisma } from "@prisma/client";
 import { AuthError } from "next-auth";
 import { redirect } from "next/navigation";
 import Stripe from "stripe";
+
+type ErrorResponse = {
+  error?: { message?: string };
+};
+
+type SuccessPetResponse = {
+  pet?: ClientPet;
+};
+
+const errorResponse = (message: string): ErrorResponse => {
+  return { error: { message } };
+};
 
 // --- Payment actions ---
 // Test Credit Card: 4242 4242 4242 4242
@@ -43,9 +55,7 @@ export const createCheckoutSession = async () => {
     handleNextAuthRedirectError(error);
     console.log(`Failed to create Stripe session: ${error}`);
   }
-  return {
-    message: "Failed to create purchase request",
-  };
+  return errorResponse("Failed to create purchase request");
 };
 
 // --- User actions ---
@@ -53,9 +63,7 @@ export const createCheckoutSession = async () => {
 export const login = async (prevState: unknown, formData: unknown) => {
   // Must check request data is of valid type (FormData)
   if (formData instanceof FormData === false) {
-    return {
-      message: "Invalid form data",
-    };
+    return errorResponse("Invalid form data");
   }
   try {
     await signIn("credentials", formData);
@@ -64,21 +72,13 @@ export const login = async (prevState: unknown, formData: unknown) => {
     handleNextAuthRedirectError(error);
     if (error instanceof AuthError) {
       switch (error.type) {
-        case "CredentialsSignin": {
-          return {
-            message: "Invalid credentials",
-          };
-        }
-        default: {
-          return {
-            message: "Error. Could not sign in.",
-          };
-        }
+        case "CredentialsSignin":
+          return errorResponse("Invalid credentials");
+        default:
+          return errorResponse("Error. Could not sign in.");
       }
     }
-    return {
-      message: "Could not sign in",
-    };
+    return errorResponse("Error. Could not sign in.");
   }
 };
 
@@ -89,26 +89,21 @@ export const logout = async () => {
     console.error(`Failed to sign out: ${error}`);
     handleNextAuthRedirectError(error);
   }
-  // Something went wrong if user was not redirected
-  return {
-    message: "Failed to sign out",
-  };
+  return errorResponse("Failed to sign out");
 };
 
 // prevState is not used but is required to satisfy usage of useFormState in auth-form.tsx
 export const signup = async (prevState: unknown, formData: unknown) => {
   // Must check request data is of valid type (FormData)
   if (formData instanceof FormData === false) {
-    return {
-      message: "Invalid form data",
-    };
+    console.error("Bad request data type. Expected FormData.");
+    return errorResponse("Invalid form data");
   }
   const credentials = Object.fromEntries(formData.entries());
   const parsedFormData = AuthSchema.safeParse(credentials);
   if (!parsedFormData.success) {
-    return {
-      message: "Invalid form data",
-    };
+    console.error("Invalid form data");
+    return errorResponse("Invalid form data");
   }
   const { email, password } = parsedFormData.data;
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -121,28 +116,26 @@ export const signup = async (prevState: unknown, formData: unknown) => {
     });
   } catch (error) {
     console.error(`Failed to create user: ${error}`);
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === "P2002") {
-        return {
-          message: "Email already exists",
-        };
-      }
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return errorResponse("Email already exists");
     }
-    return {
-      message: "Failed to create user",
-    };
+    return errorResponse("Failed to create user");
   }
 
-  console.log(`New user ${credentials.email}`);
+  console.log(`New user created: ${credentials.email}`);
   // sign in the user upon successful sign up
   await signIn("credentials", parsedFormData.data);
 };
 
 // --- Pet actions ---
-
 // server actions perform update and revalidate the layout page in a single function and single network request
 // we cannot trust input from the client so input type will initially be unknown until validation is done
-export const addPet = async (pet: unknown) => {
+export const addPet = async (
+  pet: unknown
+): Promise<SuccessPetResponse & ErrorResponse> => {
   try {
     // Must validate that add new pet request is being made by authenticated user
     const session = await checkAuth();
@@ -169,17 +162,14 @@ export const addPet = async (pet: unknown) => {
     return { pet: createdPet };
   } catch (error) {
     console.error(`Failed to add pet: ${error}`);
-    // server to return an object with a message property
-    // TODO: Victor refactor error.message
-    return {
-      error: {
-        message: "Failed to add pet",
-      },
-    };
+    return errorResponse("Failed to add pet");
   }
 };
 
-export const editPet = async (petId: unknown, newPetData: unknown) => {
+export const editPet = async (
+  petId: unknown,
+  newPetData: unknown
+): Promise<SuccessPetResponse & ErrorResponse> => {
   try {
     // Only authenticated users can delete pets
     const session = await checkAuth();
@@ -222,16 +212,13 @@ export const editPet = async (petId: unknown, newPetData: unknown) => {
     };
   } catch (error) {
     console.error(`Failed to edit pet: ${error}`);
-    // TODO: Victor refactor error.message
-    return {
-      error: {
-        message: "Failed to edit pet",
-      },
-    };
+    return errorResponse("Failed to edit pet");
   }
 };
 
-export const deletePet = async (petId: unknown) => {
+export const deletePet = async (
+  petId: unknown
+): Promise<SuccessPetResponse & ErrorResponse> => {
   try {
     // Only authenticated users can delete pets
     const session = await checkAuth();
@@ -260,11 +247,6 @@ export const deletePet = async (petId: unknown) => {
     return { pet: deletedPet };
   } catch (error) {
     console.error(`Failed to delete pet: ${error}`);
-    // TODO: Victor refactor error.message
-    return {
-      error: {
-        message: "Failed to checkout pet",
-      },
-    };
+    return errorResponse("Failed to checkout pet");
   }
 };
