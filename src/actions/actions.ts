@@ -16,33 +16,29 @@ import { Prisma } from "@prisma/client";
 import { AuthError } from "next-auth";
 import { redirect } from "next/navigation";
 import Stripe from "stripe";
-// const Stripe = require('stripe');
-// const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 // --- Payment actions ---
+// Test Credit Card: 4242 4242 4242 4242
 // https://docs.stripe.com/api/authentication
 export const createCheckoutSession = async () => {
-  // Test Credit Card: 4242 4242 4242 4242
   try {
     const session = await checkAuth();
-    if (process.env.STRIPE_SECRET_KEY) {
-      const appUrl = process.env.CANONICAL_URL;
-      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-      const checkoutSession = await stripe.checkout.sessions.create({
-        customer_email: session.user.email!, // TODO: look into typescript error
-        line_items: [
-          {
-            price: "price_1PTYPxRucQ0yETEvbn7qg2aY",
-            quantity: 1,
-          },
-        ],
-        mode: "payment",
-        success_url: `${appUrl}/payment?success=true`,
-        cancel_url: `${appUrl}/payment?cancelled=true`,
-      });
-      console.log(checkoutSession);
-      redirect(checkoutSession.url);
-    }
+    const appUrl = process.env.CANONICAL_URL;
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+    const checkoutSession = await stripe.checkout.sessions.create({
+      customer_email: session.user.email!,
+      line_items: [
+        {
+          price: process.env.STRIPE_PRICE_ID!,
+          quantity: 1,
+        },
+      ],
+      mode: "payment",
+      success_url: `${appUrl}/payment?success=true`,
+      cancel_url: `${appUrl}/payment?cancelled=true`,
+    });
+    console.log(`Created Stripe session: ${checkoutSession}`);
+    redirect(checkoutSession.url!);
   } catch (error) {
     handleNextAuthRedirectError(error);
     console.log(`Failed to create Stripe session: ${error}`);

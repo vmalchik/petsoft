@@ -62,7 +62,7 @@ const config = {
         if ((isLoginRoute || isSignupRoute) && !hasAccess) {
           // Redirect to payment page when user is logged without access privileges and navigating to login or signup
           return Response.redirect(new URL("/payment", request.nextUrl));
-        } else if (isLoginRoute || (isSignupRoute && hasAccess)) {
+        } else if ((isLoginRoute || isSignupRoute) && hasAccess) {
           // Redirect to dashboard page when user is logged with access privileges and navigating to login or signup
           return Response.redirect(new URL("/app/dashboard", request.nextUrl));
         }
@@ -80,7 +80,7 @@ const config = {
 
       // Allow access to unprotected routes when user is not logged in
       if (!isLoggedIn && !isProtectedAppRoute) return true;
-      console.log("Deny access");
+
       // Deny access for all other cases. By default next-auth will redirect to page specified by signIn property
       return false;
     },

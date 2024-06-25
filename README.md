@@ -53,7 +53,11 @@ Application uses [Stripe](https://stripe.com/) to process payments. Full applica
 
 ### Ngrok
 
-[Ngrok](https://ngrok.com/) is used to tunnel localhost to a temporary URL. This can be used to test Stripe purchases in development mode to attain parity with production payments using Stripe.
+[Ngrok](https://dashboard.ngrok.com/get-started/setup/macos) is used to tunnel localhost to a temporary URL. This can be used to test Stripe purchases in development mode to attain parity with production payments using Stripe.
+
+```sh
+ngrok http 3000
+```
 
 ## Getting Started
 
