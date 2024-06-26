@@ -45,7 +45,7 @@ For more detailed information about this application, please review the followin
    yarn install
    ```
 
-3. Setup with [Postgres or SQLite](./docs/db.md)
+3. Setup with [Postgres or SQLite](/docs/prisma-sqlite.md)
 
 ### Running the Application
 
