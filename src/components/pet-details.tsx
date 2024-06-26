@@ -87,7 +87,7 @@ const PetKeyValueDetail = ({ k, v }: PetKeyValueDetailProps) => (
 );
 
 const PetNotes = ({ pet }: PetProps) => (
-  <p className="flex-1 text-[15px] bg-white px-7 py-5 rounded-md mb-9 mx-8 border border-light">
+  <p className="flex-1 text-[15px] bg-white px-7 py-5 opacity-75 rounded-md mb-9 mx-8 border border-light">
     {pet.notes}
   </p>
 );

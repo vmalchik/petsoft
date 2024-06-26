@@ -14,7 +14,7 @@ export default function HomePage() {
         // sizes - provides information how wide image will be at different breakpoints to improve performance using fill or responsive
         priority
         quality={100} // 75 is default
-        src="https://bytegrad.com/course-assets/react-nextjs/petsoft-preview.png"
+        src="/petsoft-preview.png"
         alt="Petsoft product usage preview"
         // width and height are required for Image component to prevent layout shift
         width={519}
@@ -24,6 +24,7 @@ export default function HomePage() {
           maxWidth: "100%",
           height: "auto",
         }}
+        className="rounded-xl"
       />
 
       <div className="">
