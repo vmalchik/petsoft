@@ -14,8 +14,8 @@ model Pet {
   imageUrl  String
   age       Int
   notes     String?
-  user      User     @relation(fields: [userId], references: [id]) // userId is a field on the Pet model that references the id field on the User model
-  userId    String // userId is a foreign key that references the id field on the User model
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

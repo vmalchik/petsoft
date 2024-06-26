@@ -30,8 +30,6 @@ const errorResponse = (message: string): ErrorResponse => {
 };
 
 // --- Payment actions ---
-// Test Credit Card: 4242 4242 4242 4242
-// https://docs.stripe.com/api/authentication
 export const createCheckoutSession = async () => {
   try {
     const session = await checkAuth();
@@ -59,7 +57,7 @@ export const createCheckoutSession = async () => {
 };
 
 // --- User actions ---
-// prevState is not used but is required to satisfy usage of useFormState in auth-form.tsx
+// Note: prevState is not used but is required to satisfy usage of useFormState in auth-form
 export const login = async (prevState: unknown, formData: unknown) => {
   // Must check request data is of valid type (FormData)
   if (formData instanceof FormData === false) {
@@ -92,7 +90,6 @@ export const logout = async () => {
   return errorResponse("Failed to sign out");
 };
 
-// prevState is not used but is required to satisfy usage of useFormState in auth-form.tsx
 export const signup = async (prevState: unknown, formData: unknown) => {
   // Must check request data is of valid type (FormData)
   if (formData instanceof FormData === false) {
@@ -131,8 +128,6 @@ export const signup = async (prevState: unknown, formData: unknown) => {
 };
 
 // --- Pet actions ---
-// server actions perform update and revalidate the layout page in a single function and single network request
-// we cannot trust input from the client so input type will initially be unknown until validation is done
 export const addPet = async (
   pet: unknown
 ): Promise<SuccessPetResponse & ErrorResponse> => {
@@ -147,8 +142,6 @@ export const addPet = async (
     const createdPet = await prisma.pet.create({
       data: {
         ...validatedPet.data,
-        // alternatively could use userId
-        // userId: session.user.id,
         user: {
           connect: {
             id: session.user.id,
@@ -156,8 +149,7 @@ export const addPet = async (
         },
       },
     });
-    // revalidate the layout page because that is where we do the fetching for app/dashboard which
-    // since we do the fetch in layout we need to specify app as route and layout as location
+    // revalidate the layout page to show new content after changes
     revalidatePath("/app", "layout");
     return { pet: createdPet };
   } catch (error) {
@@ -174,7 +166,6 @@ export const editPet = async (
     // Only authenticated users can delete pets
     const session = await checkAuth();
 
-    // could use parse() instead of safeParse() but safeParse() will return an object with a success property
     const validatedPetId = PetIdSchema.safeParse(petId);
     const validatedPet = PetFormSchema.safeParse(newPetData);
 
@@ -243,6 +234,8 @@ export const deletePet = async (
     const deletedPet = await prisma.pet.delete({
       where: { id: validatedPetId.data },
     });
+
+    // revalidate the layout page to show new content after changes
     revalidatePath("/app", "layout");
     return { pet: deletedPet };
   } catch (error) {

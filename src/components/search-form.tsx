@@ -14,7 +14,6 @@ export default function SearchForm() {
 
   return (
     <form onSubmit={handleSubmit} className="w-full h-full">
-      {/* remove outline but must add another indicator that input is focused */}
       <input
         value={searchQuery}
         className={`

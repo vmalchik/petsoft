@@ -9,7 +9,6 @@ export default function PetDetails() {
   const { selectedPet } = usePetContext();
 
   return (
-    // Setting flex on section allows children that want to grow to take up the available space to do so via flex-grow
     <section className="w-full h-full flex flex-col">
       {!selectedPet ? (
         <EmptyView />
@@ -24,7 +23,7 @@ export default function PetDetails() {
   );
 }
 
-// Generally not a good idea to have layout styles part of the component but these are internal components and are not meant to be reused
+// Generally not a good idea to have layout styles part of the component but these are internal components and are not meant to be re-used
 const EmptyView = () => (
   <p className="h-full flex justify-center items-center text-2xl opacity-25">
     No pet selected

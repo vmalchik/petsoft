@@ -2,14 +2,10 @@ import Stripe from "stripe";
 import prisma from "@/lib/db";
 
 // Stripe webhook route
-// Stripe will continue to invoke this route based on configured rate
-// Can be tested with Stripe CLI or Ngrok
-// Test Credit Card: 4242 4242 4242 4242
-// E.g. https://0de1-2600-1700-38c8-4100-89af-4b68-f4d0-c78a.ngrok-free.app/api/stripe
-// https://nextjs.org/docs/app/building-your-application/routing/route-handlers
 export async function POST(request: Request) {
   let event;
-  // verify webhook signature
+
+  // Verify webhook signature
   try {
     const signature = request.headers.get("stripe-signature");
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -21,7 +17,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "Webhook Error" }, { status: 400 });
   }
 
-  // fulfill order
+  // Fulfill order
   try {
     switch (event.type) {
       case "checkout.session.completed":
@@ -39,7 +35,8 @@ export async function POST(request: Request) {
       default:
         console.log(`Unhandled event type: ${event.type}`);
     }
-    // respond with 200 OK to Stripe to indicate successful receipt
+
+    // Respond to webhook event
     return Response.json({ received: true }, { status: 200 });
   } catch (error) {
     console.error("Failed to process Stripe webhook event.", error);

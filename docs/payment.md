@@ -10,6 +10,8 @@ To help you visualize the payment process, here are two images illustrating the 
 
 Our application uses [Stripe](https://stripe.com/) to securely process payments. Full access to the application is granted only to users who have purchased a valid plan.
 
+_Note: Use the test credit card number 4242 4242 4242 4242 provided by Stripe for testing purposes._
+
 ### Testing Payments with Ngrok
 
 To test Stripe payments during development, we use [Ngrok](https://dashboard.ngrok.com/) to tunnel localhost to a temporary URL. This setup allows you to simulate production-like payment processing with Stripe while developing locally.

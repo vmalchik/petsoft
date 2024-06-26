@@ -58,8 +58,6 @@ export default function PetButton({
         <PetForm
           actionType={actionType}
           onFormSubmission={() => {
-            // setOpen(false);
-            // force a re-render if state change batching is causing ui issues
             flushSync(() => {
               setOpen(false);
             });

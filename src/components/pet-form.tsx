@@ -24,9 +24,6 @@ const fields: Field<keyof TPetForm>[] = [
     label: "Name",
     name: "name",
     type: "text",
-    // creates two sets of validation: zod and HTML5 which is not ideal as you want to have a single source of truth for validation
-    // additionally, this makes usage of useForm "register" function clunky if you spread fields { ...fields } as it needs "required" attribute
-    // required: true
   },
   {
     label: "Owner Name",
@@ -81,23 +78,22 @@ export default function PetForm({
     getValues,
     formState: { errors },
   } = useForm<TPetForm>({
-    progressive: true, // enables passage of required attribute to input elements
-    // zodResolver is a function that returns a resolver for react-hook-form to validate against a Zod schema
     resolver: zodResolver(PetFormSchema),
     defaultValues:
       actionType === "edit" ? setDefaultFormValues(pet!) : undefined,
   });
 
   const handleAction = async () => {
-    // trigger is a method from react-hook-form that triggers validation for all fields using specified resolver
     const result = await trigger();
     if (!result) {
       return;
     }
 
-    onFormSubmission(); // notify parent component that form submission is happening
+    onFormSubmission();
+
     const petData = getValues();
-    const validatedPet = PetFormSchema.parse(petData); // manually trigger parse which will apply transformations
+    // Must manually trigger parse to apply transformations when using "action"
+    const validatedPet = PetFormSchema.parse(petData);
     if (actionType === "add") {
       await handleAddPet(validatedPet);
     } else if (actionType === "edit") {
@@ -117,8 +113,6 @@ export default function PetForm({
           const { label, name, type } = field;
           return (
             <div key={name} className="space-y-1">
-              {/* htmlFor connects to id attribute */}
-              {/* name attribute is used to reference elements in JS or form data after a form is submitted */}
               <Label htmlFor={name}>{label}</Label>
               {type === "textarea" ? (
                 <Textarea

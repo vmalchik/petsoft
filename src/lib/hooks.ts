@@ -23,7 +23,7 @@ export function useSearchContext() {
 }
 
 export function useSelectedPetWithOptimisticCreate(pets: ClientPet[]) {
-  // 'pendingNewPet' variable is a fix for optimistic updates causing newly added
+  // Note: 'pendingNewPet' variable is a fix for optimistic updates causing newly added
   // to flicker in UI when selected by user before the server response
   const pendingNewPet = useRef<ClientPet | null>(null);
   const [selectedPetId, setSelectedPetId] = useState<PetId | null>(null);
@@ -72,8 +72,10 @@ export function useSelectedPetWithOptimisticCreate(pets: ClientPet[]) {
     // if user hasn't selected another pet before the server response
     // smooth update ui with the new pet id from the server without flicker
     if (pendingNewPet.current?.id === tempId) {
-      pendingNewPet.current = newPet; // prevents flicker in components depending on selected pet
-      setSelectedPetId(newPet.id); // schedules re-render of selected pet
+      // prevents flicker in components depending on selected pet
+      pendingNewPet.current = newPet;
+      // schedules re-render of selected pet
+      setSelectedPetId(newPet.id);
     }
   };
 

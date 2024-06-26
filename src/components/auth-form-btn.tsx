@@ -9,7 +9,8 @@ type AuthFormBtnProps = {
 };
 
 export default function AuthFormBtn({ type }: AuthFormBtnProps) {
-  const { pending } = useFormStatus(); // hook can only be used in a component that is a child of a form element
+  // Hook can only be used in a component that is a child of a form element
+  const { pending } = useFormStatus();
   return (
     <Button disabled={pending}>
       {type === "login" ? "Log in" : "Sign up"}

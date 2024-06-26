@@ -20,7 +20,7 @@ export async function getPetById(petId: PetId) {
       id: petId,
     },
     select: {
-      userId: true, // only select userId from the response. prevents over fetching
+      userId: true,
     },
   });
   return pet;

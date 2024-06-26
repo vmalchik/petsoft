@@ -7,16 +7,12 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 
-// Typed based on NextJS docs
-// https://nextjs.org/docs/app/api-reference/file-conventions/page
 type PaymentPageProps = {
   searchParams: {
     [key: string]: string | string[] | undefined;
   };
 };
 
-// useSearchParams() can be used inside client-side components
-// page components are special and provide searchParams as props
 export default function PaymentPage({ searchParams }: PaymentPageProps) {
   const { data: session, update, status } = useSession();
   const router = useRouter();
@@ -25,13 +21,6 @@ export default function PaymentPage({ searchParams }: PaymentPageProps) {
   const showButton = success !== "true";
   const paymentSuccessful = Boolean(success);
   const paymentCancelled = Boolean(cancelled);
-
-  // Update session on successful payment. Does not work in NextJS version 5.0.0-beta.4
-  // useEffect(() => {
-  //   if (paymentSuccessful) {
-  //     update()
-  //   }
-  // },[paymentSuccessful, update])
 
   return (
     <main className="min-w-60 flex flex-col items-center space-y-10">
@@ -53,8 +42,9 @@ export default function PaymentPage({ searchParams }: PaymentPageProps) {
           <Button
             disabled={status === "loading" || session?.user.hasAccess}
             onClick={async () => {
-              // send request to api/auth/session to update JWT with updated access privileges
+              // Request updated JWT with new access privileges
               await update(true);
+              // Attempt to access dashboard with updated JWT
               router.push("/app/dashboard");
             }}
           >

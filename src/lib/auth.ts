@@ -8,18 +8,11 @@ const config = {
   pages: {
     signIn: "/login",
   },
-  //   Following are the default session values
-  //   session: {
-  //     maxAge: 30 * 24 * 60 * 60, // 30 days
-  //     strategy: "jwt",
-  //   },
   providers: [
-    // NextAuth will encrypt the token
     Credentials({
       async authorize(credentials) {
-        // runs on every login attempt
         try {
-          // Validate
+          // Must validate input
           const parsedFormData = AuthSchema.safeParse(credentials);
 
           if (!parsedFormData.success) {
@@ -38,7 +31,7 @@ const config = {
             return null;
           }
 
-          return user; // NextAuth will filter out certain user properties such as password
+          return user; // Note: NextAuth will filter out certain user properties such as password
         } catch (e) {
           console.log("Authorize Exception", e);
         }
@@ -49,9 +42,10 @@ const config = {
   ],
   callbacks: {
     authorized: async ({ auth, request }) => {
-      // runs on every request with middleware
-      const isLoggedIn = Boolean(auth?.user?.email); // Provided by next-auth. Value is equal to return of authorize function
-      const hasAccess = Boolean(auth?.user?.hasAccess); // Custom property added to user object with valid payment plan
+      // Provided by next-auth. Value is equal to return of authorize function
+      const isLoggedIn = Boolean(auth?.user?.email);
+      // Custom property added to user object with valid payment plan
+      const hasAccess = Boolean(auth?.user?.hasAccess);
 
       // Requested Route
       const isProtectedAppRoute = request.nextUrl.pathname.includes("/app");
@@ -86,14 +80,14 @@ const config = {
     },
     jwt: async ({ token, user, trigger }) => {
       if (user) {
-        // inject custom properties into token
+        // Inject custom properties into token
         token.userId = user.id;
         token.email = user.email!;
         token.hasAccess = user.hasAccess;
       }
 
       if (trigger === "update") {
-        // obtain latest user data from database
+        // Obtain latest user data from database
         const dbUser = await getUserByEmail(token.email);
         if (dbUser) {
           token.hasAccess = dbUser.hasAccess;
@@ -103,8 +97,8 @@ const config = {
       return token;
     },
     session: ({ session, token }) => {
-      // inject custom properties into session to make it available to the client
-      // must create next-auth-d.ts and update JWT interface to include userId
+      // Inject custom properties into session to make it available to the client
+      // Note: must create next-auth-d.ts and update JWT interface to include userId
       if (session.user) {
         session.user.id = token.userId;
         session.user.hasAccess = token.hasAccess;

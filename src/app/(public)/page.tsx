@@ -6,21 +6,14 @@ import Link from "next/link";
 export default function HomePage() {
   return (
     <main className="bg-[#5DC9A8] min-h-screen flex flex-col xl:flex-row items-center justify-center gap-10">
-      {/* NextJS Image component usage */}
-      {/* https://www.youtube.com/watch?v=IU_qq_c_lKA */}
       <Image
-        // Use fill with sizes together
-        // fill
-        // sizes - provides information how wide image will be at different breakpoints to improve performance using fill or responsive
         priority
-        quality={100} // 75 is default
+        quality={100}
         src="/petsoft-preview.png"
         alt="Petsoft product usage preview"
-        // width and height are required for Image component to prevent layout shift
         width={519}
         height={472}
         style={{
-          // width: "100%",
           maxWidth: "100%",
           height: "auto",
         }}

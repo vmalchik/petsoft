@@ -11,16 +11,11 @@ type AuthFormProps = {
   type: "login" | "signup";
 };
 
+// Note: this page supports progressive enhancement
 export default function AuthForm({ type }: AuthFormProps) {
-  // type === "login" ? login : signup
-  // Note: this is a different hook from useFormStatus in auth-form-btn.tsx
-  //       main reason to use this hook is to preserve progressive enhancement including with error state
   const [signUpError, dispatchSignUpAction] = useFormState(signup, undefined);
   const [loginError, dispatchLoginAction] = useFormState(login, undefined);
   return (
-    // Redirect to desired location based on callback in URL. Note: doing () => fn() would lose progressive enhancement
-    // <form action={() => { await login(); Router.push(// callback URL value"); }}>
-    // progressive enhancement enabled for this form
     <form
       action={type === "login" ? dispatchLoginAction : dispatchSignUpAction}
     >
@@ -29,7 +24,7 @@ export default function AuthForm({ type }: AuthFormProps) {
         <Input
           id="email"
           type="email"
-          name="email" // must be provided for next-auth to work
+          name="email"
           required
           autoComplete="username"
         />
@@ -39,14 +34,20 @@ export default function AuthForm({ type }: AuthFormProps) {
         <Input
           id="password"
           type="password"
-          name="password" // must be provided for next-auth to work
+          name="password"
           required
           autoComplete="current-password"
         />
       </div>
       <AuthFormBtn type={type} />
-      {signUpError && <ErrorMessage message={signUpError.message} />}
-      {loginError && <ErrorMessage message={loginError.message} />}
+      {signUpError && (
+        <ErrorMessage
+          message={signUpError?.error?.message || "Signup failed"}
+        />
+      )}
+      {loginError && (
+        <ErrorMessage message={loginError?.error?.message || "Login failed"} />
+      )}
     </form>
   );
 }

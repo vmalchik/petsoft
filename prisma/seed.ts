@@ -1,7 +1,7 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
-// OK to do here instead of in a server component via db.ts because this is a one-time operation
+// OK to create a new PrismaClient here because this is a one-time operation
 const prisma = new PrismaClient();
 
 const userData: Prisma.UserCreateInput = {

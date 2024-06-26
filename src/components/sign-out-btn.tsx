@@ -12,10 +12,9 @@ export default function SignOutBtn() {
       <Button
         disabled={isPending}
         onClick={() => {
-          // https://react.dev/reference/rsc/use-server#calling-a-server-action-outside-of-form
           startTransition(async () => {
-            const error = await logout();
-            error && setError(error?.message || "Failed to sign out");
+            const data = await logout();
+            data && setError(data?.error?.message || "Failed to sign out");
           });
         }}
       >

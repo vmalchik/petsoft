@@ -12,9 +12,10 @@ Join PetSoft today and elevate your pet daycare management experience!
 ## Tech Stack
 
 - **Next.js**: The React framework used for building the frontend and server-side rendering.
+- **Tailwind CSS**: CSS framework for rapidly building user interfaces.
 - **Stripe**: Integrated for secure payment processing and managing purchases (Test Mode).
-- **Vercel**: The platform used for deploying the web application.
 - **Prisma/Postgres**: Prisma as the ORM for interacting with the PostgreSQL database, used for storing event data and other related information.
+- **Vercel**: The platform used for deploying the web application.
 
 ## Getting Started
 
