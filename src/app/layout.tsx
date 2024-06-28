@@ -16,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="scrollbar-thin scrollbar-none">
       <body
         className={`${inter.className} text-sm text-color-zinc-900  bg-[#E5E8EC] min-h-screen`}
       >

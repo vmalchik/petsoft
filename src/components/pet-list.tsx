@@ -8,7 +8,7 @@ import { Button } from "./ui/button";
 export default function PetList() {
   const { pets } = usePetContext();
   return (
-    <ul className="bg-white border-b border-light">
+    <ul className="bg-white border-b border-light h-full md:h-[560px] scrollbar-thin scrollbar-thumb-rounded-none scrollbar-track-rounded-none scrollbar-thumb-[#2C9676]/75 scrollbar-track-transparent overflow-y-scroll">
       {pets.map((pet) => (
         <PetItem key={pet.id} pet={pet} />
       ))}
@@ -28,7 +28,7 @@ const PetItem = ({ pet }: PetItemProps) => {
         variant="ghost"
         aria-label={`Select pet ${pet.name}`}
         className={cn(
-          "h-[70px] w-full rounded-none flex items-center justify-start  px-5 text-base gap-3 hover:bg-[#EFF1F2] focus:bg-[#EFF1F2] transition",
+          "h-[70px] w-full rounded-none flex items-center justify-start px-5 text-base gap-3 hover:bg-[#EFF1F2] focus:bg-[#EFF1F2] transition",
           {
             "bg-[#EFF1F2]": pet.id === selectedPetId,
           }
