@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <main className="bg-[#5DC9A8] min-h-screen flex flex-col xl:flex-row items-center justify-center gap-10">
+    <main className="bg-[#5DC9A8] min-h-screen flex flex-col xl:flex-row items-center justify-center gap-10 px-10">
       <Image
         priority
         quality={100}
