@@ -31,6 +31,9 @@ export async function getAllPetsByUserId(userId: UserId) {
     where: {
       userId,
     },
+    orderBy: {
+      createdAt: "asc",
+    },
   });
   return pets;
 }
