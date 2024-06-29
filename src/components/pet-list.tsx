@@ -30,7 +30,8 @@ const PetItem = ({ pet }: PetItemProps) => {
         className={cn(
           "h-[70px] w-full rounded-none flex items-center justify-start px-5 text-base gap-3 hover:bg-[#EFF1F2] focus:bg-[#EFF1F2] transition",
           {
-            "bg-[#EFF1F2]": pet.id === selectedPetId,
+            "bg-[#EFF1F2]":
+              pet.id === selectedPetId?.id || pet.id === selectedPetId?.tmpId,
           }
         )}
         onClick={() => handleChangeSelectedPetId(pet.id)}

@@ -1,19 +1,22 @@
 "use client";
 import { addPet, deletePet, editPet } from "@/actions/actions";
 import { NEW_PET_TEMP_ID_PREFIX } from "@/lib/constants";
-import {
-  useSearchContext,
-  useSelectedPetWithOptimisticCreate,
-} from "@/lib/hooks";
+import { useSearchContext } from "@/lib/hooks";
 import type { ClientPet, NewPet, PetId } from "@/lib/types";
-import { createContext, useOptimistic, startTransition, useMemo } from "react";
+import {
+  createContext,
+  useOptimistic,
+  startTransition,
+  useMemo,
+  useState,
+} from "react";
 import { toast } from "sonner";
 
 type TPetContext = {
   pets: ClientPet[];
   numPets: number;
-  selectedPetId: PetId | null;
-  selectedPet: ClientPet | null;
+  selectedPetId: { id: PetId | null; tmpId: PetId | null } | null;
+  selectedPet: ClientPet | undefined;
   handleChangeSelectedPetId: (id: PetId) => void;
   handleCheckoutPet: (id: PetId) => Promise<void>;
   handleAddPet: (pet: NewPet) => Promise<void>;
@@ -59,6 +62,11 @@ export default function PetContextProvider({
 }: PetContextProviderProps) {
   // state
   const { searchQuery } = useSearchContext();
+  // object usage addresses the issue of flickering when selecting a newly added pet
+  const [selectedPetId, setSelectedPetId] = useState<{
+    id: string | null;
+    tmpId: string | null;
+  } | null>(null);
 
   const [optimisticPets, setOptimisticPets] = useOptimistic(
     data,
@@ -76,16 +84,13 @@ export default function PetContextProvider({
     }
   );
 
-  const {
-    selectedPetId,
-    selectedPet,
-    handleChangeSelectedPetId,
-    handleOptimisticCreatedPet,
-    handleResolvedCreatedPet,
-  } = useSelectedPetWithOptimisticCreate(optimisticPets);
-
   // derived state / computed state
   const numPets = optimisticPets.length;
+  const selectedPet = useMemo(() => {
+    return optimisticPets.find(
+      (pet) => pet.id === selectedPetId?.id || pet.id === selectedPetId?.tmpId
+    );
+  }, [optimisticPets, selectedPetId]);
 
   const filteredPets = useMemo(() => {
     return optimisticPets.filter((pet) => {
@@ -98,8 +103,11 @@ export default function PetContextProvider({
     toast.warning(message);
   };
 
+  const handleChangeSelectedPetId = (id: PetId) => {
+    setSelectedPetId({ id, tmpId: null });
+  };
+
   const handleCheckoutPet = async (id: PetId) => {
-    handleChangeSelectedPetId(null);
     startTransition(() => {
       setOptimisticPets({
         action: OptimisticPetActions.delete,
@@ -115,22 +123,27 @@ export default function PetContextProvider({
   const handleAddPet = async (pet: NewPet) => {
     const tempId = `${NEW_PET_TEMP_ID_PREFIX}-${Date.now()}`;
     const newPet: ClientPet = { ...pet, id: tempId };
-    handleOptimisticCreatedPet(newPet);
     setOptimisticPets({
       action: OptimisticPetActions.add,
       payload: { pet: newPet },
     });
-
+    setSelectedPetId({ id: null, tmpId: tempId });
     const response = await addPet(pet);
-    if (response.pet) {
-      handleResolvedCreatedPet(response.pet, tempId);
+    if (response?.pet?.id) {
+      setSelectedPetId((prev) => {
+        return prev?.tmpId === tempId
+          ? { id: response!.pet!.id, tmpId: tempId }
+          : prev;
+      });
     } else {
       handleError(response.error?.message || "Failed to add pet");
       setOptimisticPets({
         action: OptimisticPetActions.delete,
         payload: { id: tempId },
       });
-      handleChangeSelectedPetId(null);
+      setSelectedPetId((prev) => {
+        return prev?.tmpId === tempId ? { id: null, tmpId: null } : prev;
+      });
     }
   };
 
