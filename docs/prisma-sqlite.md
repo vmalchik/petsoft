@@ -42,6 +42,14 @@ npx prisma db seed
 
 _Note: This depends on having a prisma.seed script defined in your package.json._
 
+## Reset Database
+
+This command is typically used in development environments to reset the database to a clean state
+
+```sh
+npx prisma migrate reset
+```
+
 ### Prisma Studio
 
 Prisma Studio provides a graphical interface to interact with your database. To launch Prisma Studio, run:
