@@ -1,3 +1,8 @@
+/********************************************************
+ *
+ * Note: This file used for local development and testing
+ *
+ ********************************************************/
 import { Prisma, PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
