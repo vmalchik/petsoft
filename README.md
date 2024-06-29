@@ -17,6 +17,11 @@ Join PetSoft today and elevate your pet daycare management experience!
 - **Prisma/Postgres**: Prisma as the ORM for interacting with the PostgreSQL database, used for storing event data and other related information.
 - **Vercel**: The platform used for deploying the web application.
 
+## Branches
+
+- Development: [main](https://github.com/vmalchik/petsoft/tree/main)
+- Production: [prod](https://github.com/vmalchik/petsoft/tree/prod)
+
 ## Getting Started
 
 Before you begin, ensure you have the latest version of Node.js installed. This project uses Node.js 20.x or later.
@@ -28,6 +33,7 @@ For more detailed information about this application, please review the followin
 - [Components Structure](/docs/components.md): An overview of the structure and organization of application components.
 - [Stripe Payments](/docs/payment.md): Detailed information on how Stripe is integrated for payment processing and managing subscriptions.
 - [Local Database](/docs/prisma-sqlite.md): Instructions and guidelines for setting up and managing the local database using Prisma with SQLite.
+- [Production Database](/docs/prisma-postgres.md): Instructions and guidelines for deploying using Prisma with Postgres.
 
 ### Installation
 
