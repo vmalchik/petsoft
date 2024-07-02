@@ -1,5 +1,6 @@
 import Logo from "@/components/logo";
 import { Button } from "@/components/ui/button";
+import { Routes } from "@/lib/constants";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -32,10 +33,10 @@ export default function HomePage() {
         </p>
         <div className="mt-10 space-x-3">
           <Button asChild>
-            <Link href="/signup">Get started</Link>
+            <Link href={Routes.Signup}>Get started</Link>
           </Button>
           <Button variant="secondary" asChild>
-            <Link href="/login">Login</Link>
+            <Link href={Routes.Login}>Login</Link>
           </Button>
         </div>
       </div>

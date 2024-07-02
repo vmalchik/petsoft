@@ -3,6 +3,7 @@
 import { createCheckoutSession } from "@/actions/actions";
 import H1 from "@/components/h1";
 import { Button } from "@/components/ui/button";
+import { Routes } from "@/lib/constants";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
@@ -45,7 +46,7 @@ export default function PaymentPage({ searchParams }: PaymentPageProps) {
               // Request updated JWT with new access privileges
               await update(true);
               // Attempt to access dashboard with updated JWT
-              router.push("/app/dashboard");
+              router.push(Routes.Dashboard);
             }}
           >
             Access PetSoft

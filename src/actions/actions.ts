@@ -16,6 +16,7 @@ import { Prisma } from "@prisma/client";
 import { AuthError } from "next-auth";
 import { redirect } from "next/navigation";
 import Stripe from "stripe";
+import { Routes } from "@/lib/constants";
 
 type ErrorResponse = {
   error?: { message?: string };
@@ -44,8 +45,8 @@ export const createCheckoutSession = async () => {
         },
       ],
       mode: "payment",
-      success_url: `${appUrl}/payment?success=true`,
-      cancel_url: `${appUrl}/payment?cancelled=true`,
+      success_url: `${appUrl}${Routes.Payment}?success=true`,
+      cancel_url: `${appUrl}${Routes.Payment}?cancelled=true`,
     });
     console.log(`Created Stripe session: ${checkoutSession}`);
     redirect(checkoutSession.url!);
@@ -82,7 +83,7 @@ export const login = async (prevState: unknown, formData: unknown) => {
 
 export const logout = async () => {
   try {
-    await signOut({ redirectTo: "/login" });
+    await signOut({ redirectTo: Routes.Login });
   } catch (error) {
     console.error(`Failed to sign out: ${error}`);
     handleNextAuthRedirectError(error);
@@ -150,7 +151,7 @@ export const addPet = async (
       },
     });
     // revalidate the layout page to show new content after changes
-    revalidatePath("/app", "layout");
+    revalidatePath(Routes.App, "layout");
     return { pet: createdPet };
   } catch (error) {
     console.error(`Failed to add pet: ${error}`);
@@ -197,7 +198,7 @@ export const editPet = async (
       data: validatedPet.data,
     });
 
-    revalidatePath("/app", "layout");
+    revalidatePath(Routes.App, "layout");
     return {
       pet: updatedPet,
     };
@@ -236,7 +237,7 @@ export const deletePet = async (
     });
 
     // revalidate the layout page to show new content after changes
-    revalidatePath("/app", "layout");
+    revalidatePath(Routes.App, "layout");
     return { pet: deletedPet };
   } catch (error) {
     console.error(`Failed to delete pet: ${error}`);
