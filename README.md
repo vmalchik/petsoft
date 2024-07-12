@@ -7,6 +7,10 @@ Welcome to PetSoft! This application is a comprehensive virtual pet daycare mana
 - **Check-Out Picked-Up Pets**: Quickly check out pets when they are picked up by their owners.
 - **Individual Pet Details and Notes**: Maintain detailed records and notes for each pet, ensuring personalized care.
 
+[![Watch the video](app_preview.png)](https://youtu.be/toDKzAJwT1s)
+
+_(Right-click and select "Open link in new tab" to watch the video in a new tab.)_
+
 Join PetSoft today and elevate your pet daycare management experience!
 
 ## Tech Stack

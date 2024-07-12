@@ -4,15 +4,16 @@ import Link from "next/link";
 import Logo from "./logo";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { Routes } from "@/lib/constants";
 
 const routes = [
   {
     name: "Dashboard",
-    path: "/app/dashboard",
+    path: Routes.Dashboard,
   },
   {
     name: "Account",
-    path: "/app/account",
+    path: Routes.Account,
   },
 ];
 

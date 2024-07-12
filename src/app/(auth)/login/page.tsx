@@ -1,5 +1,6 @@
 import AuthForm from "@/components/auth-form";
 import H1 from "@/components/h1";
+import { Routes } from "@/lib/constants";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -9,7 +10,10 @@ export default function LoginPage() {
       <AuthForm type="login" />
       <p className="mt-6 text-sm text-zinc-500">
         No account yet?{" "}
-        <Link href="/signup" className="mt-6 text-sm text-zinc-500 font-medium">
+        <Link
+          href={Routes.Signup}
+          className="mt-6 text-sm text-zinc-500 font-medium"
+        >
           Sign up
         </Link>
       </p>

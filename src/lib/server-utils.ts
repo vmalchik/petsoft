@@ -4,12 +4,13 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { PetId, UserId } from "./types";
 import prisma from "./db";
+import { Routes } from "./constants";
 
 export async function checkAuth() {
   const session = await auth();
   if (!session?.user) {
-    console.error("No valid session. Redirecting to /login");
-    redirect("/login");
+    console.error("No valid session. Redirecting to login");
+    redirect(Routes.Login);
   }
   return session;
 }

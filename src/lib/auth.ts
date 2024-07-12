@@ -3,10 +3,11 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { getUserByEmail } from "./server-utils";
 import { AuthSchema } from "./validations";
+import { Routes } from "./constants";
 
 const config = {
   pages: {
-    signIn: "/login",
+    signIn: Routes.Login,
   },
   providers: [
     Credentials({
@@ -48,17 +49,17 @@ const config = {
       const hasAccess = Boolean(auth?.user?.hasAccess);
 
       // Requested Route
-      const isProtectedAppRoute = request.nextUrl.pathname.includes("/app");
-      const isLoginRoute = request.nextUrl.pathname.includes("/login");
-      const isSignupRoute = request.nextUrl.pathname.includes("/signup");
+      const isProtectedAppRoute = request.nextUrl.pathname.includes(Routes.App);
+      const isLoginRoute = request.nextUrl.pathname.includes(Routes.Login);
+      const isSignupRoute = request.nextUrl.pathname.includes(Routes.Signup);
 
       if (isLoggedIn && !isProtectedAppRoute) {
         if ((isLoginRoute || isSignupRoute) && !hasAccess) {
           // Redirect to payment page when user is logged without access privileges and navigating to login or signup
-          return Response.redirect(new URL("/payment", request.nextUrl));
+          return Response.redirect(new URL(Routes.Payment, request.nextUrl));
         } else if ((isLoginRoute || isSignupRoute) && hasAccess) {
           // Redirect to dashboard page when user is logged with access privileges and navigating to login or signup
-          return Response.redirect(new URL("/app/dashboard", request.nextUrl));
+          return Response.redirect(new URL(Routes.Dashboard, request.nextUrl));
         }
         // Allow user to visit other unprotected routes when logged in
         return true;
@@ -66,7 +67,7 @@ const config = {
 
       // Redirect to payment page when user is logged in but has no access privileges
       if (isLoggedIn && isProtectedAppRoute && !hasAccess) {
-        return Response.redirect(new URL("/payment", request.nextUrl));
+        return Response.redirect(new URL(Routes.Payment, request.nextUrl));
       }
 
       // Allow access to protected routes when user is logged with access privileges and navigating to a protected route
